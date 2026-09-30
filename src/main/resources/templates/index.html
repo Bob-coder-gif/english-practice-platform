@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:tex1="${title}">英语练习打卡平台</title>
+</head>
+<body>
+    <h1 th:text="${title}">英语练习打卡平台</h1>
+    <p>当前词库单词数:<span th:text="${wordCount}">0</span></p>
+
+    <a href="/register">注册</a>
+    <a href="/login">登录</a>
+</body>
+</html>
