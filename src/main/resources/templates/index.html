@@ -2,13 +2,17 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:tex1="${title}">英语练习打卡平台</title>
+    <title th:text="${title}">英语练习打卡平台</title>
 </head>
 <body>
-    <h1 th:text="${title}">英语练习打卡平台</h1>
-    <p>当前词库单词数:<span th:text="${wordCount}">0</span></p>
+<h1 th:text="${title}">英语练习打卡平台</h1>
 
-    <a href="/register">注册</a>
-    <a href="/login">登录</a>
+<!-- 有 message 时才显示，比如注册成功后 -->
+<p th:if="${message}" th:text="${message}" style="color: green;">提示信息</p>
+
+<p>当前词库单词数：<span th:text="${wordCount}">0</span></p>
+
+<a th:href="@{/register}">注册</a>
+<a th:href="@{/login}">登录</a>
 </body>
 </html>
