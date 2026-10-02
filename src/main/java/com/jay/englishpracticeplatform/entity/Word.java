@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -27,7 +29,7 @@ public class Word {
     private String phonetic;
 
     @Column(nullable = false, length = 500)
-    private String meanings;
+    private String meaning;
 
     @ElementCollection
     @CollectionTable(
@@ -36,6 +38,7 @@ public class Word {
             indexes = @Index(name = "idx_word_levels_level", columnList = "level, word_id")
     )
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
     @Column(name = "level", nullable = false , length = 20)
     private Set<WordLevel> levels = new HashSet<>();
 }

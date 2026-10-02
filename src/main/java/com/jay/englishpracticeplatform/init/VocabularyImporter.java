@@ -6,7 +6,6 @@ import com.jay.englishpracticeplatform.entity.Word;
 import com.jay.englishpracticeplatform.entity.WordLevel;
 import com.jay.englishpracticeplatform.repository.WordRepository;
 
-import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -89,7 +88,7 @@ public class VocabularyImporter implements ApplicationRunner {
             Word word = new Word();
             word.setSpelling(spelling);
             word.setPhonetic(raw.phonetic() == null ? null : raw.phonetic().strip());
-            word.setMeanings(meaning);
+            word.setMeaning(meaning);
             word.getLevels().addAll(raw.levels);
             unique.put(key,word);
         }
