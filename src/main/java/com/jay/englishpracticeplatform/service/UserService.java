@@ -1,8 +1,11 @@
 package com.jay.englishpracticeplatform.service;
 
 import com.jay.englishpracticeplatform.entity.User;
+import com.jay.englishpracticeplatform.exception.InvalidCredentialsException;
 import com.jay.englishpracticeplatform.exception.UsernameAlreadyExistsException;
 import com.jay.englishpracticeplatform.repository.UserRepository;
+import com.jay.englishpracticeplatform.exception.InvalidCredentialsException;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -40,4 +43,17 @@ public class UserService {
             throw new UsernameAlreadyExistsException(username);
         }
     }
+
+    @Transactional(readOnly = true)
+    public User login(String username, String rawPassword){
+        User user = userRepository.findByUsername(username)
+                        .orElseThrow(() -> new InvalidCredentialsException());
+
+        if (!passwordEncoder.matches(rawPassword, user.getPasswordHash())){
+            throw new InvalidCredentialsException();
+        }
+
+        return user;
+    }
+
 }

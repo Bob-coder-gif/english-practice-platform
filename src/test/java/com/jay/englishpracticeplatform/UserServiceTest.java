@@ -3,6 +3,8 @@ package com.jay.englishpracticeplatform;
 import com.jay.englishpracticeplatform.exception.UsernameAlreadyExistsException;
 import com.jay.englishpracticeplatform.entity.User;
 import com.jay.englishpracticeplatform.service.UserService;
+import com.jay.englishpracticeplatform.exception.InvalidCredentialsException;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,5 +41,28 @@ class UserServiceTest {
 
         assertThrows(UsernameAlreadyExistsException.class,
                 () -> userService.register("bob", "654321"));
+    }
+
+    @Test
+    void loginSuccess(){
+        userService.register("carol","123456");
+
+        User user = userService.login("carol","123456");
+
+        assertEquals("carol", user.getUsername());
+    }
+
+    @Test
+    void loginWrongPasswordThrows(){
+        userService.register("dava","123456");
+
+        assertThrows(InvalidCredentialsException.class,
+                        () -> userService.login("dava" ,"wrong_password"));
+    }
+
+    @Test
+    void loginNonexistentUserThrows(){
+        assertThrows(InvalidCredentialsException.class,
+                () -> userService.login("nobody","123456"));
     }
 }
