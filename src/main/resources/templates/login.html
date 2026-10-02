@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>登录 - 英语练习打卡平台</title>
+    <style>
+        .error { color: red; font-size: 14px; }
+        .success {color: green; }
+        .field { margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+    <h1>登录</h1>
+
+    <!-- 注册成功后跳转过来时显示 -->
+    <p class="success" th:if="${message}" th:text="${message}">提示信息</p>
+    <!-- 用户名或密码错误时显示 -->
+    <p class="error" th:if="${loginError}" th:text="${loginError}">登陆错误</p>
+
+    <form th:action="@{/login}" th:object="${loginForm}" method="post">
+
+        <div class="field">
+            <label for="username">用户名：</label>
+            <input type="text" id="username" th:field="*{username}">
+            <div class="error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">用户名错误</div>
+        </div>
+
+        <div class="field">
+            <label for="password">密码：</label>
+            <input type="password" id="password" name="password">
+            <div class="error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">密码错误</div>
+        </div>
+
+        <button type="submit">登录</button>
+    </form>
+
+    <p>还没有账号？ <a th:href="@{/register}">去注册</a></p>
+
+</body>
+</html>
