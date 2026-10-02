@@ -17,6 +17,8 @@
     <!-- 用户名或密码错误时显示 -->
     <p class="error" th:if="${loginError}" th:text="${loginError}">登陆错误</p>
 
+    <p class="error" th:if="${param.required}">请先登录</p>
+
     <form th:action="@{/login}" th:object="${loginForm}" method="post">
 
         <div class="field">

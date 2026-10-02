@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>背单词 - 英语练习打卡平台</title>
+</head>
+<body>
+    <h1>背单词</h1>
+    <p><strong th:text="${loginUser.username}">用户名</strong>，这里是背单词界面。</p>
+    <p><a th:href="@{/}">返回首页</a> </p>
+</body>
+</html>
