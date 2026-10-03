@@ -1,0 +1,84 @@
+/* ==================== 主题颜色 ==================== */
+:root {
+    --app-pink: #fb7299;
+    --app-pink-dark: #e85d85;
+    --app-blue: #00aeec;
+    --app-blue-dark: #0096cc;
+    --app-bg: #f1f2f3;
+    --app-text: #18191c;
+    --app-text-muted: #9499a0;
+    --app-border: #e3e5e7;
+    --app-radius: 8px;
+}
+
+body {
+    background-color: var(--app-bg);
+    color: var(--app-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC",
+    "Microsoft YaHei", sans-serif;
+}
+
+/* ==================== 导航栏 ==================== */
+.app-navbar {
+    background-color: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.app-navbar .navbar-brand {
+    color: var(--app-pink);
+    font-weight: 600;
+}
+
+.app-navbar .nav-link {
+    color: var(--app-text);
+}
+
+.app-navbar .nav-link:hover,
+.app-navbar .nav-link.active {
+    color: var(--app-pink);
+}
+
+/* ==================== 卡片 ==================== */
+.app-card {
+    background-color: #fff;
+    border: none;
+    border-radius: var(--app-radius);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* ==================== 按钮：覆盖 Bootstrap 的默认颜色 ==================== */
+.btn-primary {
+    --bs-btn-bg: var(--app-pink);
+    --bs-btn-border-color: var(--app-pink);
+    --bs-btn-hover-bg: var(--app-pink-dark);
+    --bs-btn-hover-border-color: var(--app-pink-dark);
+    --bs-btn-active-bg: var(--app-pink-dark);
+    --bs-btn-active-border-color: var(--app-pink-dark);
+}
+
+.btn-info {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: var(--app-blue);
+    --bs-btn-border-color: var(--app-blue);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--app-blue-dark);
+    --bs-btn-hover-border-color: var(--app-blue-dark);
+}
+
+/* ==================== 通用 ==================== */
+.text-muted-app {
+    color: var(--app-text-muted);
+}
+
+/* 保留释义中的换行，每个词性单独一行 */
+.meaning {
+    white-space: pre-line;
+}
+
+.phonetic {
+    color: var(--app-text-muted);
+}
+
+a {
+    color: var(--app-blue);
+}

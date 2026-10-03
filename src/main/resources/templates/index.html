@@ -1,33 +1,63 @@
 <!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title th:text="${title}">英语练习打卡平台</title>
-</head>
+<head th:replace="~{fragments/common :: head('首页')}"></head>
 <body>
-    <h1 th:text="${title}">英语练习打卡平台</h1>
+<nav th:replace="~{fragments/common :: navbar}"></nav>
 
-    <p th:if="${message}" th:text="${message}" style="color: green;">提示信息</p>
+<main class="container">
 
-    <p>当前词库单词数：<span th:text="${wordCount}">0</span></p>
+    <div class="alert alert-success" th:if="${message}" th:text="${message}">[提示信息]</div>
 
     <!-- 已登录 -->
-    <div th:if="${loginUser}">
-        <p>欢迎你，<strong th:text="${loginUser.username}">用户名</strong>！</p>
-        <p><a th:href="@{study}">开始背单词</a> </p>
-        <p><a th:href="@{/review}">复习</a></p>
-        <p><a th:href="@{mistakes}">错题本</a> </p>
-        <p><a th:href="@{/words}">浏览单词列表</a> </p>
+    <th:block th:if="${loginUser}">
+        <div class="app-card p-4 mb-4">
+            <h1 class="h4 mb-1">欢迎回来，<span th:text="${loginUser.username}">[用户名]</span></h1>
+            <p class="text-muted-app mb-0">
+                词库共 <span th:text="${wordCount}">0</span> 个单词，今天也要坚持哦
+            </p>
+        </div>
 
-        <form th:action="@{/logout}" method="post">
-            <button type="submit">退出登录</button>
-        </form>
-    </div>
+        <div class="row g-3">
+            <div class="col-6 col-md-3">
+                <a th:href="@{/study}" class="app-card d-block p-4 text-center text-decoration-none">
+                    <div class="fs-2">📖</div>
+                    <div class="fw-semibold text-dark">学习新单词</div>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a th:href="@{/review}" class="app-card d-block p-4 text-center text-decoration-none">
+                    <div class="fs-2">🔁</div>
+                    <div class="fw-semibold text-dark">复习</div>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a th:href="@{/mistakes}" class="app-card d-block p-4 text-center text-decoration-none">
+                    <div class="fs-2">📕</div>
+                    <div class="fw-semibold text-dark">错题本</div>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a th:href="@{/words}" class="app-card d-block p-4 text-center text-decoration-none">
+                    <div class="fs-2">📚</div>
+                    <div class="fw-semibold text-dark">单词列表</div>
+                </a>
+            </div>
+        </div>
+    </th:block>
 
     <!-- 未登录 -->
-    <div th:unless="${loginUser}">
-        <a th:href="@{/register}">注册</a>
-        <a th:href="@{/login}">登录</a>
+    <div class="app-card p-5 text-center" th:unless="${loginUser}">
+        <h1 class="h3 mb-3">英语练习打卡平台</h1>
+        <p class="text-muted-app">
+            覆盖高考、四六级、考研、雅思共 <span th:text="${wordCount}">0</span> 个单词，
+            间隔重复帮你记得更牢
+        </p>
+        <a class="btn btn-primary me-2" th:href="@{/register}">立即注册</a>
+        <a class="btn btn-outline-secondary" th:href="@{/login}">登录</a>
     </div>
+
+</main>
+
+<th:block th:replace="~{fragments/common :: scripts}"></th:block>
 </body>
 </html>

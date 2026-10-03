@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- ==================== 公共 head ==================== -->
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' - 英语练习打卡平台'">[标题]</title>
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<!-- ==================== 导航栏 ==================== -->
+<nav th:fragment="navbar" class="navbar navbar-expand-md app-navbar mb-4">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/}">英语练习打卡平台</a>
+
+        <!-- 手机屏幕上，菜单折叠成这个按钮 -->
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse" data-bs-target="#mainNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNav">
+            <!-- 已登录才显示功能菜单 -->
+            <ul class="navbar-nav me-auto" th:if="${loginUser}">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/study}"
+                       th:classappend="${currentPath == '/study'} ? 'active'">学习</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/review}"
+                       th:classappend="${currentPath == '/review'} ? 'active'">复习</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/mistakes}"
+                       th:classappend="${currentPath == '/mistakes'} ? 'active'">错题本</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/words}"
+                       th:classappend="${currentPath == '/words'} ? 'active'">单词列表</a>
+                </li>
+            </ul>
+
+            <!-- 右侧：用户信息 -->
+            <div class="ms-auto d-flex align-items-center gap-2">
+                <th:block th:if="${loginUser}">
+                    <span class="text-muted-app" th:text="${loginUser.username}">[用户名]</span>
+                    <form th:action="@{/logout}" method="post" class="m-0">
+                        <button type="submit" class="btn btn-sm btn-outline-secondary">退出</button>
+                    </form>
+                </th:block>
+                <th:block th:unless="${loginUser}">
+                    <a class="btn btn-sm btn-outline-secondary" th:href="@{/login}">登录</a>
+                    <a class="btn btn-sm btn-primary" th:href="@{/register}">注册</a>
+                </th:block>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ==================== 公共脚本 ==================== -->
+<th:block th:fragment="scripts">
+    <script th:src="@{/vendor/bootstrap/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/js/app.js}"></script>
+</th:block>
+
+</body>
+</html>
