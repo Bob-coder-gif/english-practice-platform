@@ -34,4 +34,9 @@ public class WordService {
     public long countAll(){
         return wordRepository.count();
     }
+
+    @Transactional(readOnly = true)
+    public long countByLevel(WordLevel level){
+        return wordRepository.countByLevel(level);
+    }
 }
