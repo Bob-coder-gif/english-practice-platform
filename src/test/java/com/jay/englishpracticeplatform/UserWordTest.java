@@ -32,7 +32,7 @@ public class UserWordTest {
         userWord.markKnown(now);
         userWord.markKnown(now);
 
-        userWord.markUnknow(now);
+        userWord.markUnknown(now);
 
         assertEquals(0,userWord.getStreak());
         assertEquals(now,userWord.getNextReviewAt());

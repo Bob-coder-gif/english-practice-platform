@@ -76,7 +76,7 @@ public class UserWord {
     }
 
     //用户点了 [不认识]
-    public void markUnknow(LocalDateTime now){
+    public void markUnknown(LocalDateTime now){
         unknownCount++;
         streak = 0;
         lastReviewedAt = now;
