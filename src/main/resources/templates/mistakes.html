@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>错题本 - 英语练习打卡平台</title>
+    <style>
+        table { border-collapse: collapse; margin-top: 16px; }
+        th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; vertical-align: top; }
+        .phonetic { color: #666; }
+        .meaning { white-space: pre-line; }
+        .count { text-align: center; }
+        .pager { margin-top: 16px; }
+        .pager a, .pager span { margin-right: 12px; }
+    </style>
+</head>
+<body>
+<h1>错题本</h1>
+<p><a th:href="@{/}">返回首页</a> | <a th:href="@{/review}">去复习</a></p>
+
+<p>
+    共 <span th:text="${mistakePage.totalElements}">0</span> 个待攻克的单词，按不认识的次数排序。
+    复习时连续认识 <span th:text="${T(com.jay.englishpracticeplatform.service.StudyService).MASTERED_STREAK}">3</span> 次后，会自动移出错题本。
+</p>
+
+<table th:if="${mistakePage.totalElements > 0}">
+    <thead>
+    <tr>
+        <th>单词</th>
+        <th>音标</th>
+        <th>释义</th>
+        <th>不认识</th>
+        <th>认识</th>
+        <th>连续认识</th>
+        <th>下次复习</th>
+        <th>发音</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="uw : ${mistakePage.content}">
+        <td th:text="${uw.word.spelling}">[单词]</td>
+        <td class="phonetic">
+            <span th:if="${uw.word.phonetic}" th:text="'/' + ${uw.word.phonetic} + '/'">[音标]</span>
+        </td>
+        <td class="meaning" th:text="${uw.word.meaning}">[释义]</td>
+        <td class="count" th:text="${uw.unknownCount}">0</td>
+        <td class="count" th:text="${uw.knownCount}">0</td>
+        <td class="count" th:text="${uw.streak}">0</td>
+        <td th:text="${#temporals.format(uw.nextReviewAt, 'yyyy-MM-dd HH:mm')}">[时间]</td>
+        <td><button type="button" class="speak" th:data-word="${uw.word.spelling}">🔊</button></td>
+    </tr>
+    </tbody>
+</table>
+
+<p th:if="${mistakePage.totalElements == 0}">🎉 还没有不认识的单词。</p>
+
+<!-- 分页 -->
+<div class="pager" th:if="${totalPages > 1}">
+    <a th:if="${currentPage > 1}" th:href="@{/mistakes(page=${currentPage - 1})}">上一页</a>
+    <span>第 <span th:text="${currentPage}">1</span> / <span th:text="${totalPages}">1</span> 页</span>
+    <a th:if="${currentPage < totalPages}" th:href="@{/mistakes(page=${currentPage + 1})}">下一页</a>
+</div>
+
+<script>
+    document.querySelectorAll('.speak').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const utterance = new SpeechSynthesisUtterance(button.dataset.word);
+            utterance.lang = 'en-US';
+            speechSynthesis.cancel();
+            speechSynthesis.speak(utterance);
+        });
+    });
+</script>
+</body>
+</html>
