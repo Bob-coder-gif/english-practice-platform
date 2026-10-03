@@ -15,6 +15,8 @@
     <div th:if="${loginUser}">
         <p>欢迎你，<strong th:text="${loginUser.username}">用户名</strong>！</p>
         <p><a th:href="@{study}">开始背单词</a> </p>
+        <p><a th:href="@{/words}">浏览单词列表</a> </p>
+
         <form th:action="@{/logout}" method="post">
             <button type="submit">退出登录</button>
         </form>

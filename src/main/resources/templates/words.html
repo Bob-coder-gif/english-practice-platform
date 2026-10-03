@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>单词列表 - 英语练习打卡平台</title>
+    <style>
+        .levels a { margin-right: 12px; }
+        .levels .active { font-weight: bold; color: black; text-decoration: none; }
+        table { border-collapse: collapse; margin-top: 16px; }
+        th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; vertical-align: top; }
+        .phonetic { color: #666; }
+        .meaning { white-space: pre-line; }
+        .pager { margin-top: 16px; }
+        .pager a, .pager span { margin-right: 12px; }
+        .jump { margin-top: 12px; }
+        .jump input[type="number"] { width: 70px; }
+    </style>
+</head>
+<body>
+<h1>单词列表</h1>
+<p><a th:href="@{/}">返回首页</a></p>
+
+<!-- 级别切换 -->
+<div class="levels">
+    <a th:each="lv : ${levels}"
+       th:href="@{/words(level=${lv})}"
+       th:text="${lv.label}"
+       th:classappend="${lv == currentLevel} ? 'active'">级别</a>
+</div>
+
+<p>
+    <span th:text="${currentLevel.label}">四级</span>
+    共 <span th:text="${wordPage.totalElements}">0</span> 个单词
+</p>
+
+<!-- 单词表格 -->
+<table>
+    <thead>
+    <tr>
+        <th>单词</th>
+        <th>音标</th>
+        <th>释义</th>
+        <th>发音</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="w : ${wordPage.content}">
+        <td th:text="${w.spelling}">[单词]</td>
+        <td class="phonetic">
+            <span th:if="${w.phonetic}" th:text="'/' + ${w.phonetic} + '/'">[音标]</span>
+        </td>
+        <td class="meaning" th:text="${w.meaning}">[释义]</td>
+        <td><button type="button" class="speak" th:data-word="${w.spelling}">🔊</button></td>
+    </tr>
+    </tbody>
+</table>
+
+<!-- 分页 -->
+<div class="pager">
+    <a th:if="${currentPage > 1}"
+       th:href="@{/words(level=${currentLevel}, page=1)}">首页</a>
+
+    <a th:if="${currentPage > 1}"
+       th:href="@{/words(level=${currentLevel}, page=${currentPage - 1})}">上一页</a>
+
+    <span>第 <span th:text="${currentPage}">1</span>
+              / <span th:text="${totalPages}">1</span> 页</span>
+
+    <a th:if="${currentPage < totalPages}"
+       th:href="@{/words(level=${currentLevel}, page=${currentPage + 1})}">下一页</a>
+
+    <a th:if="${currentPage < totalPages}"
+       th:href="@{/words(level=${currentLevel}, page=${totalPages})}">末页</a>
+</div>
+
+<!-- 跳转到指定页 -->
+<form class="jump" th:action="@{/words}" method="get">
+    <input type="hidden" name="level" th:value="${currentLevel}">
+    跳转到第
+    <input type="number" name="page" min="1"
+           th:max="${totalPages}" th:value="${currentPage}" required>
+    页
+    <button type="submit">跳转</button>
+</form>
+
+<script>
+    // 使用浏览器自带的语音合成朗读单词
+    document.querySelectorAll('.speak').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const utterance = new SpeechSynthesisUtterance(button.dataset.word);
+            utterance.lang = 'en-US';
+            speechSynthesis.cancel();   // 停止正在朗读的内容，避免连续点击时排队
+            speechSynthesis.speak(utterance);
+        });
+    });
+</script>
+</body>
+</html>
