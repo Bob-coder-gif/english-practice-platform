@@ -3,10 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <title>背单词 - 英语练习打卡平台</title>
+    <style>
+        .levels a {margin-right: 12px;}
+        .levels .active { font-weight: bold; color: black; text-decoration: none;}
+        .card { border: 1px solid #ccc; padding: 24px; margin-top: 16px; max-width: 480px;}
+        .spelling { font-size: 36px; margin: 0 0 8px;}
+        .phonetic { color: #666; margin: 0 0 16px; }
+        .meaning { white-space: pre-line; margin: 16px 0; }
+        .actions { margin-top: 16px; }
+        .actions button { font-size: 18px; padding: 8px 24px; margin-right: 12px; }
+    </style>
 </head>
 <body>
     <h1>背单词</h1>
-    <p><strong th:text="${loginUser.username}">用户名</strong>，这里是背单词界面。</p>
-    <p><a th:href="@{/}">返回首页</a> </p>
+    <p><a th:href="@{/}">返回首页</a> | <a th:href="@{words(level=${currentLevel})}">浏览单词列表</a> </p>
+
+    <!-- 级别切换 -->
+    <div class="levels">
+        <a th:each="lv : ${levels}"
+           th:href="@{/study(level=${lv})}"
+           th:text="${lv.label}"
+           th:classappend="${lv == currentLevel} ? 'active'">级别</a>
+    </div>
+
+    <p>
+        <span th:text="${currentLevel.label}">四级</span> ：已学
+        <span th:text="${learnedCount}">0</span> /
+        <span th:text="${totalCount}">0</span>
+    </p>
+
+    <!-- 还有新单词 -->
+    <div class="card" th:if="${word}">
+        <p class="spelling" th:text="${word.spelling}">[单词]</p>
+        <p class="phonetic" th:if="${word.phonetic}" th:text="'/' + ${word.phonetic} + '/'">[音标]</p>
+
+        <button type="button" id="speak-button" th:data-word="${word.spelling}">🔊 发音</button>
+        <button type="button" id="toggle-meaning">显示释义</button>
+
+        <p class="meaning" id="meaning" hidden th:text="${word.meaning}">[释义]</p>
+
+        <form class="actions" id="answer-form" th:action="@{/study/answer}" method="post">
+            <input type="hidden" name="wordId" th:value="${word.id}">
+            <input type="hidden" name="level" th:value="${currentLevel}">
+            <button type="submit" name="known" value="true">认识</button>
+            <button type="submit" name="known" value="false">不认识</button>
+        </form>
+    </div>
+
+    <!-- 全部学完 -->
+    <div th:unless="${word}">
+        <p>🎉 这个级别的单词已经全部学过了！</p>
+    </div>
+
+    <script>
+        const speakButton = document.getElementById('speak-button');
+        const toggleButton = document.getElementById('toggle-meaning')
+        const meaning = document.getElementById('meaning');
+        const answerForm = document.getElementById('answer-form');
+
+        //学完所有但此时，页面上没有这些元素，要先判断是否存在
+        if(speakButton){
+            speakButton.addEventListener('click', function(){
+                const utterance = new SpeechSynthesisUtterance(speakButton.dataset.word);
+                utterance.lang = 'en-US';
+                speechSynthesis.cancel();
+                speechSynthesis.speak(utterance);
+            });
+        }
+
+        if(toggleButton){
+            toggleButton.addEventListener('click', function(){
+               meaning.hidden = !meaning.hidden;
+               toggleButton.textContent = meaning.hidden ? '显示释义' : '隐藏释义';
+            });
+        }
+
+        //防止重复提交，快速点两下时，只提交第一次
+        if(answerForm){
+            let submitted = false;
+            answerForm.addEventListener('sumbit', function (event){
+               if(submitted){
+                   event.preventDefault();
+               }
+               submitted = true;
+            });
+        }
+
+    </script>
+
 </body>
 </html>
