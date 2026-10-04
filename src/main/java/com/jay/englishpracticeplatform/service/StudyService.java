@@ -3,9 +3,14 @@ package com.jay.englishpracticeplatform.service;
 import com.jay.englishpracticeplatform.entity.UserWord;
 import com.jay.englishpracticeplatform.entity.Word;
 import com.jay.englishpracticeplatform.entity.WordLevel;
+import com.jay.englishpracticeplatform.repository.AnswerRecordRepository;
 import com.jay.englishpracticeplatform.repository.UserRepository;
 import com.jay.englishpracticeplatform.repository.UserWordRepository;
 import com.jay.englishpracticeplatform.repository.WordRepository;
+import com.jay.englishpracticeplatform.entity.AnswerMode;
+import com.jay.englishpracticeplatform.entity.AnswerRecord;
+import com.jay.englishpracticeplatform.entity.User;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -27,13 +32,16 @@ public class StudyService {
     private final WordRepository wordRepository;
     private final UserRepository userRepository;
     private final UserWordRepository userWordRepository;
+    private final AnswerRecordRepository answerRecordRepository;
 
     public StudyService(WordRepository wordRepository,
                         UserRepository userRepository,
-                        UserWordRepository userWordRepository) {
+                        UserWordRepository userWordRepository,
+                        AnswerRecordRepository answerRecordRepository) {
         this.wordRepository = wordRepository;
         this.userRepository = userRepository;
         this.userWordRepository = userWordRepository;
+        this.answerRecordRepository = answerRecordRepository;
     }
 
     // 找出该用户在这个级别中，下一个还没学过的单词
@@ -51,22 +59,28 @@ public class StudyService {
 
     // 记录一次「认识」或「不认识」
     @Transactional
-    public void recordAnswer(Long userId, Long wordId, boolean known) {
+    public void recordAnswer(Long userId, Long wordId, boolean known, AnswerMode mode) {
         Word word = wordRepository.findById(wordId)
                 .orElseThrow(() -> new IllegalArgumentException("单词不存在：" + wordId));
+        User userRef = userRepository.getReferenceById(userId);
 
-        // 有记录就用已有的，没有就新建一条
-        UserWord userWord = userWordRepository.findByUserIdAndWordId(userId, wordId)
-                .orElseGet(() -> new UserWord(userRepository.getReferenceById(userId), word));
-
+        //同一次答题只取一次当前时间，保证状态更新和答题记录的时间完全一致
         LocalDateTime now = LocalDateTime.now();
-        if (known) {
+
+        // 更新单词的学习状态
+        UserWord userWord = userWordRepository.findByUserIdAndWordId(userId,wordId)
+                .orElseGet( () -> new UserWord(userRef, word));
+
+        if( known){
             userWord.markKnown(now);
-        } else {
+        }
+        else {
             userWord.markUnknown(now);
         }
-
         userWordRepository.save(userWord);
+
+        //写入答题记录
+        answerRecordRepository.save(new AnswerRecord(userRef,word,mode,known,now));
     }
 
     // 复习：下一个到期的单词

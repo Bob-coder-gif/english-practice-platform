@@ -2,9 +2,11 @@ package com.jay.englishpracticeplatform.controller;
 
 import com.jay.englishpracticeplatform.common.SessionKeys;
 import com.jay.englishpracticeplatform.dto.LoginUser;
+import com.jay.englishpracticeplatform.entity.AnswerMode;
 import com.jay.englishpracticeplatform.entity.WordLevel;
 import com.jay.englishpracticeplatform.service.StudyService;
 import com.jay.englishpracticeplatform.service.WordService;
+import com.jay.englishpracticeplatform.entity.AnswerMode;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -42,7 +44,7 @@ public class StudyController {
                          @RequestParam Long wordId,
                          @RequestParam boolean known,
                          @RequestParam WordLevel level){
-        studyService.recordAnswer(loginUser.id(), wordId, known);
+        studyService.recordAnswer(loginUser.id(), wordId, known, AnswerMode.LEARN);
         return "redirect:/study?level=" + level.name();
     }
 }

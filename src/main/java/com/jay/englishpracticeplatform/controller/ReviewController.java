@@ -2,6 +2,7 @@ package com.jay.englishpracticeplatform.controller;
 
 import com.jay.englishpracticeplatform.common.SessionKeys;
 import com.jay.englishpracticeplatform.dto.LoginUser;
+import com.jay.englishpracticeplatform.entity.AnswerMode;
 import com.jay.englishpracticeplatform.entity.UserWord;
 import com.jay.englishpracticeplatform.service.StudyService;
 
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttribute;
+import com.jay.englishpracticeplatform.entity.AnswerMode;
 
 @Controller
 public class ReviewController {
@@ -36,7 +38,7 @@ public class ReviewController {
     public String answer(@SessionAttribute(SessionKeys.LOGIN_USER) LoginUser loginUser,
                          @RequestParam Long wordId,
                          @RequestParam boolean known){
-        studyService.recordAnswer(loginUser.id(), wordId, known);
+        studyService.recordAnswer(loginUser.id(), wordId, known, AnswerMode.REVIEW);
         return "redirect:/review";
     }
 
