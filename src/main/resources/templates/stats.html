@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('学习统计')}"></head>
+<body>
+<nav th:replace="~{fragments/common :: navbar}"></nav>
+
+<main class="container">
+
+    <!-- 顶部四个数字 -->
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-md-3">
+            <div class="app-card p-3 text-center">
+                <div class="text-muted-app small">今日答题</div>
+                <div class="fs-3 fw-semibold" th:text="${stats.todayTotal}">0</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="app-card p-3 text-center">
+                <div class="text-muted-app small">累计学过</div>
+                <div class="fs-3 fw-semibold" th:text="${stats.learnedCount}">0</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <a class="app-card p-3 text-center d-block text-decoration-none text-reset" th:href="@{/review}">
+                <div class="text-muted-app small">待复习</div>
+                <div class="fs-3 fw-semibold" th:text="${stats.dueCount}">0</div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a class="app-card p-3 text-center d-block text-decoration-none text-reset" th:href="@{/mistakes}">
+                <div class="text-muted-app small">错题本</div>
+                <div class="fs-3 fw-semibold" th:text="${stats.mistakeCount}">0</div>
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <!-- 今日明细 -->
+        <div class="col-md-6">
+            <div class="app-card p-3 h-100">
+                <h2 class="h6 mb-3">今日明细</h2>
+                <div class="d-flex justify-content-between py-1" th:each="m : ${stats.todayByMode}">
+                    <span th:text="${m.mode.label}">[模式]</span>
+                    <span>
+                        <span th:text="${m.total}">0</span> 题
+                        <span class="text-muted-app small">（答对 <span th:text="${m.correct}">0</span>）</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 累计正确率 -->
+        <div class="col-md-6">
+            <div class="app-card p-3 h-100">
+                <h2 class="h6 mb-3">累计正确率</h2>
+                <div class="fs-2 fw-semibold mb-1">
+                    <span th:text="${stats.accuracyPercent()}">0</span>%
+                </div>
+                <div class="text-muted-app small">
+                    共答题 <span th:text="${stats.totalAnswers}">0</span> 次，
+                    答对 <span th:text="${stats.correctAnswers}">0</span> 次
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 每日答题柱状图 -->
+    <div class="app-card p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h6 mb-0">每日答题数</h2>
+            <div class="btn-group btn-group-sm">
+                <a class="btn btn-outline-secondary" th:href="@{/stats(days=7)}"
+                   th:classappend="${days == 7} ? 'active'">近 7 天</a>
+                <a class="btn btn-outline-secondary" th:href="@{/stats(days=30)}"
+                   th:classappend="${days == 30} ? 'active'">近 30 天</a>
+            </div>
+        </div>
+        <div style="height: 260px;">
+            <canvas id="dailyChart"></canvas>
+        </div>
+    </div>
+
+    <!-- 各级别学习进度 -->
+    <div class="app-card p-3 mb-4">
+        <h2 class="h6 mb-3">各级别学习进度</h2>
+        <div class="mb-3" th:each="lp : ${stats.levelProgress}">
+            <div class="d-flex justify-content-between small mb-1">
+                <span th:text="${lp.level.label}">[级别]</span>
+                <span class="text-muted-app">
+                    <span th:text="${lp.learned}">0</span> / <span th:text="${lp.total}">0</span>
+                    （<span th:text="${#numbers.formatDecimal(lp.percent(), 1, 1)}">0.0</span>%）
+                </span>
+            </div>
+            <div class="progress" style="height: 8px;">
+                <div class="progress-bar" th:style="'width: ' + ${lp.percent()} + '%'"></div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<th:block th:replace="~{fragments/common :: scripts}"></th:block>
+<script th:src="@{/vendor/chartjs/chart.umd.min.js}"></script>
+<script th:inline="javascript">
+    // 由 Thymeleaf 把 Java 的数据转换成 JavaScript 数组
+    const labels = /*[[${stats.dailyLabels()}]]*/ [];
+    const values = /*[[${stats.dailyValues()}]]*/ [];
+
+    new Chart(document.getElementById('dailyChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '答题数',
+                data: values,
+                backgroundColor: '#fb7299',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { precision: 0 } }
+            }
+        }
+    });
+</script>
+</body>
+</html>

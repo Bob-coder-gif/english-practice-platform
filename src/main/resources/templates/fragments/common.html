@@ -41,6 +41,10 @@
                     <a class="nav-link" th:href="@{/words}"
                        th:classappend="${currentPath == '/words'} ? 'active'">单词列表</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/stats}"
+                       th:classappend="${currentPath == '/stats'} ? 'active'">统计</a>
+                </li>
             </ul>
 
             <!-- 右侧：用户信息 -->

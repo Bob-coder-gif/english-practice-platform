@@ -56,4 +56,17 @@ public interface UserWordRepository extends JpaRepository< UserWord, Long> {
     Page<UserWord> findMistakes(Long userId, int masteredStreak, Pageable pageable);
 
     Long user(User user);
+
+    //累计学过多少个单词
+    long countByUserId(Long userId);
+
+    //错题泵中国的单词数量
+    @Query("""
+           select count(uw) from UserWord uw
+           where uw.user.id = :userId
+                and uw.unknownCount > 0 
+                and uw.streak < :masteredStreak
+           
+           """)
+    long countMistakes(Long userId, int masteredStreak);
 }
