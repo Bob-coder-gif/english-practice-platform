@@ -22,3 +22,60 @@ document.querySelectorAll('form[data-submit-once]').forEach(function (form) {
         submitted = true;
     });
 });
+
+// ==================== 单词卡片：看英文想中文 / 看中文想英文 ====================
+// 页面上有 data-flashcard 的卡片时才启用
+(function () {
+    const card = document.querySelector('[data-flashcard]');
+    if (!card) {
+        return;
+    }
+
+    const STORAGE_KEY = 'studyMode';
+    const english = card.querySelector('[data-side="en"]');
+    const chinese = card.querySelector('[data-side="cn"]');
+    const revealButton = card.querySelector('[data-reveal]');
+    const modeButtons = document.querySelectorAll('[data-mode]');
+
+    // 读取上次的选择；浏览器禁用存储时会抛异常，此时使用默认值
+    let mode = 'show-en';
+    try {
+        mode = localStorage.getItem(STORAGE_KEY) || 'show-en';
+    } catch (e) {
+        // 忽略，使用默认模式
+    }
+
+    // 根据当前模式，决定显示哪一面
+    function render() {
+        const showEnglish = (mode === 'show-en');
+        english.hidden = !showEnglish;
+        chinese.hidden = showEnglish;
+        revealButton.hidden = false;
+        revealButton.textContent = showEnglish ? '显示释义' : '显示单词';
+        modeButtons.forEach(function (button) {
+            button.classList.toggle('active', button.dataset.mode === mode);
+        });
+    }
+
+    // 切换模式
+    modeButtons.forEach(function (button) {
+        button.addEventListener('click', function () {
+            mode = button.dataset.mode;
+            try {
+                localStorage.setItem(STORAGE_KEY, mode);
+            } catch (e) {
+                // 存不了也不影响本次使用
+            }
+            render();
+        });
+    });
+
+    // 揭晓答案：两面都显示
+    revealButton.addEventListener('click', function () {
+        english.hidden = false;
+        chinese.hidden = false;
+        revealButton.hidden = true;
+    });
+
+    render();
+})();

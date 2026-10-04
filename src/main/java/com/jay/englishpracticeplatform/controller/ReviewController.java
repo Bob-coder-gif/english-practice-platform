@@ -57,6 +57,7 @@ public class ReviewController {
         model.addAttribute("mistakePage", mistakePage);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages",totalPages);
+        model.addAttribute("masteredStreak",StudyService.MASTERED_STREAK);
         return "mistakes";
     }
 }

@@ -1,95 +1,76 @@
 <!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>背单词 - 英语练习打卡平台</title>
-    <style>
-        .levels a {margin-right: 12px;}
-        .levels .active { font-weight: bold; color: black; text-decoration: none;}
-        .card { border: 1px solid #ccc; padding: 24px; margin-top: 16px; max-width: 480px;}
-        .spelling { font-size: 36px; margin: 0 0 8px;}
-        .phonetic { color: #666; margin: 0 0 16px; }
-        .meaning { white-space: pre-line; margin: 16px 0; }
-        .actions { margin-top: 16px; }
-        .actions button { font-size: 18px; padding: 8px 24px; margin-right: 12px; }
-    </style>
-</head>
+<head th:replace="~{fragments/common :: head('学习新单词')}"></head>
 <body>
-    <h1>背单词</h1>
-    <p><a th:href="@{/}">返回首页</a> </p>
+<nav th:replace="~{fragments/common :: navbar}"></nav>
+
+<main class="container" style="max-width: 720px;">
 
     <!-- 级别切换 -->
-    <div class="levels">
-        <a th:each="lv : ${levels}"
-           th:href="@{/study(level=${lv})}"
-           th:text="${lv.label}"
-           th:classappend="${lv == currentLevel} ? 'active'">级别</a>
-    </div>
+    <ul class="nav nav-pills mb-3">
+        <li class="nav-item" th:each="lv : ${levels}">
+            <a class="nav-link"
+               th:href="@{/study(level=${lv})}"
+               th:text="${lv.label}"
+               th:classappend="${lv == currentLevel} ? 'active'">[级别]</a>
+        </li>
+    </ul>
 
-    <p>
-        <span th:text="${currentLevel.label}">四级</span> ：已学
-        <span th:text="${learnedCount}">0</span> /
-        <span th:text="${totalCount}">0</span>
-    </p>
+    <!-- 学习进度 -->
+    <div class="app-card p-3 mb-3">
+        <div class="d-flex justify-content-between mb-2">
+            <span><span th:text="${currentLevel.label}">[级别]</span>学习进度</span>
+            <span class="text-muted-app">
+                <span th:text="${learnedCount}">0</span> / <span th:text="${totalCount}">0</span>
+            </span>
+        </div>
+        <div class="progress" style="height: 8px;">
+            <div class="progress-bar"
+                 th:style="'width: ' + ${totalCount > 0 ? learnedCount * 100 / totalCount : 0} + '%'"></div>
+        </div>
+    </div>
 
     <!-- 还有新单词 -->
-    <div class="card" th:if="${word}">
-        <p class="spelling" th:text="${word.spelling}">[单词]</p>
-        <p class="phonetic" th:if="${word.phonetic}" th:text="'/' + ${word.phonetic} + '/'">[音标]</p>
+    <th:block th:if="${word}">
+        <!-- 模式切换 -->
+        <div class="btn-group btn-group-sm mb-3">
+            <button type="button" class="btn btn-outline-secondary" data-mode="show-en">看英文想中文</button>
+            <button type="button" class="btn btn-outline-secondary" data-mode="show-cn">看中文想英文</button>
+        </div>
 
-        <button type="button" id="speak-button" th:data-word="${word.spelling}">🔊 发音</button>
-        <button type="button" id="toggle-meaning">显示释义</button>
+        <div class="app-card p-4 text-center" data-flashcard>
+            <!-- 英文面 -->
+            <div data-side="en">
+                <div class="display-6 fw-semibold mb-1" th:text="${word.spelling}">[单词]</div>
+                <div class="phonetic mb-2" th:if="${word.phonetic}"
+                     th:text="'/' + ${word.phonetic} + '/'">[音标]</div>
+                <button type="button" class="btn btn-sm btn-outline-secondary"
+                        th:data-speak="${word.spelling}">🔊 发音</button>
+            </div>
 
-        <p class="meaning" id="meaning" hidden th:text="${word.meaning}">[释义]</p>
+            <!-- 中文面：默认隐藏，由 app.js 根据模式决定 -->
+            <div data-side="cn" class="meaning mt-3 fs-5" hidden th:text="${word.meaning}">[释义]</div>
 
-        <form class="actions" id="answer-form" th:action="@{/study/answer}" method="post">
-            <input type="hidden" name="wordId" th:value="${word.id}">
-            <input type="hidden" name="level" th:value="${currentLevel}">
-            <button type="submit" name="known" value="true">认识</button>
-            <button type="submit" name="known" value="false">不认识</button>
-        </form>
-    </div>
+            <button type="button" class="btn btn-link mt-3" data-reveal>显示释义</button>
+
+            <form class="d-flex justify-content-center gap-3 mt-3" data-submit-once
+                  th:action="@{/study/answer}" method="post">
+                <input type="hidden" name="wordId" th:value="${word.id}">
+                <input type="hidden" name="level" th:value="${currentLevel}">
+                <button type="submit" name="known" value="true" class="btn btn-primary px-4">认识</button>
+                <button type="submit" name="known" value="false" class="btn btn-outline-secondary px-4">不认识</button>
+            </form>
+        </div>
+    </th:block>
 
     <!-- 全部学完 -->
-    <div th:unless="${word}">
-        <p>🎉 这个级别的单词已经全部学过了！</p>
+    <div class="app-card p-5 text-center" th:unless="${word}">
+        <div class="fs-1 mb-2">🎉</div>
+        <p class="mb-0">这个级别的单词已经全部学过了！</p>
     </div>
 
-    <script>
-        const speakButton = document.getElementById('speak-button');
-        const toggleButton = document.getElementById('toggle-meaning')
-        const meaning = document.getElementById('meaning');
-        const answerForm = document.getElementById('answer-form');
+</main>
 
-        //学完所有但此时，页面上没有这些元素，要先判断是否存在
-        if(speakButton){
-            speakButton.addEventListener('click', function(){
-                const utterance = new SpeechSynthesisUtterance(speakButton.dataset.word);
-                utterance.lang = 'en-US';
-                speechSynthesis.cancel();
-                speechSynthesis.speak(utterance);
-            });
-        }
-
-        if(toggleButton){
-            toggleButton.addEventListener('click', function(){
-               meaning.hidden = !meaning.hidden;
-               toggleButton.textContent = meaning.hidden ? '显示释义' : '隐藏释义';
-            });
-        }
-
-        //防止重复提交，快速点两下时，只提交第一次
-        if(answerForm){
-            let submitted = false;
-            answerForm.addEventListener('sumbit', function (event){
-               if(submitted){
-                   event.preventDefault();
-               }
-               submitted = true;
-            });
-        }
-
-    </script>
-
+<th:block th:replace="~{fragments/common :: scripts}"></th:block>
 </body>
 </html>

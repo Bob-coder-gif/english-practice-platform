@@ -1,84 +1,60 @@
 <!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>复习 - 英语练习打卡平台</title>
-    <style>
-        .card { border: 1px solid #ccc; padding: 24px; margin-top: 16px; max-width: 480px; }
-        .spelling { font-size: 36px; margin: 0 0 8px; }
-        .phonetic { color: #666; margin: 0 0 16px; }
-        .meaning { white-space: pre-line; margin: 16px 0; }
-        .stats { color: #666; font-size: 14px; }
-        .actions { margin-top: 16px; }
-        .actions button { font-size: 18px; padding: 8px 24px; margin-right: 12px; }
-    </style>
-</head>
+<head th:replace="~{fragments/common :: head('复习')}"></head>
 <body>
-<h1>复习</h1>
-<p><a th:href="@{/}">返回首页</a> | <a th:href="@{/mistakes}">错题本</a></p>
+<nav th:replace="~{fragments/common :: navbar}"></nav>
 
-<p>待复习：<span th:text="${dueCount}">0</span> 个</p>
+<main class="container" style="max-width: 720px;">
 
-<!-- 有到期的单词 -->
-<div class="card" th:if="${userWord}">
-    <p class="spelling" th:text="${userWord.word.spelling}">[单词]</p>
-    <p class="phonetic" th:if="${userWord.word.phonetic}"
-       th:text="'/' + ${userWord.word.phonetic} + '/'">[音标]</p>
+    <div class="app-card p-3 mb-3 d-flex justify-content-between align-items-center">
+        <span>待复习 <strong class="fs-5" th:text="${dueCount}">0</strong> 个</span>
+        <a th:href="@{/mistakes}">查看错题本 →</a>
+    </div>
 
-    <p class="stats">
-        认识 <span th:text="${userWord.knownCount}">0</span> 次，
-        不认识 <span th:text="${userWord.unknownCount}">0</span> 次，
-        连续认识 <span th:text="${userWord.streak}">0</span> 次
-    </p>
+    <!-- 有到期的单词 -->
+    <th:block th:if="${userWord}">
+        <div class="btn-group btn-group-sm mb-3">
+            <button type="button" class="btn btn-outline-secondary" data-mode="show-en">看英文想中文</button>
+            <button type="button" class="btn btn-outline-secondary" data-mode="show-cn">看中文想英文</button>
+        </div>
 
-    <button type="button" id="speak-button" th:data-word="${userWord.word.spelling}">🔊 发音</button>
-    <button type="button" id="toggle-meaning">显示释义</button>
+        <div class="app-card p-4 text-center" data-flashcard>
+            <div data-side="en">
+                <div class="display-6 fw-semibold mb-1" th:text="${userWord.word.spelling}">[单词]</div>
+                <div class="phonetic mb-2" th:if="${userWord.word.phonetic}"
+                     th:text="'/' + ${userWord.word.phonetic} + '/'">[音标]</div>
+                <button type="button" class="btn btn-sm btn-outline-secondary"
+                        th:data-speak="${userWord.word.spelling}">🔊 发音</button>
+            </div>
 
-    <p class="meaning" id="meaning" hidden th:text="${userWord.word.meaning}">[释义]</p>
+            <div data-side="cn" class="meaning mt-3 fs-5" hidden th:text="${userWord.word.meaning}">[释义]</div>
 
-    <form class="actions" id="answer-form" th:action="@{/review/answer}" method="post">
-        <input type="hidden" name="wordId" th:value="${userWord.word.id}">
-        <button type="submit" name="known" value="true">认识</button>
-        <button type="submit" name="known" value="false">不认识</button>
-    </form>
-</div>
+            <button type="button" class="btn btn-link mt-3" data-reveal>显示释义</button>
 
-<!-- 没有到期的单词 -->
-<div th:unless="${userWord}">
-    <p>✅ 当前没有需要复习的单词，去 <a th:href="@{/study}">学习新单词</a> 吧！</p>
-</div>
+            <p class="text-muted-app small mt-2 mb-0">
+                认识 <span th:text="${userWord.knownCount}">0</span> 次 ·
+                不认识 <span th:text="${userWord.unknownCount}">0</span> 次 ·
+                连续认识 <span th:text="${userWord.streak}">0</span> 次
+            </p>
 
-<script>
-    const speakButton = document.getElementById('speak-button');
-    const toggleButton = document.getElementById('toggle-meaning');
-    const meaning = document.getElementById('meaning');
-    const answerForm = document.getElementById('answer-form');
+            <form class="d-flex justify-content-center gap-3 mt-3" data-submit-once
+                  th:action="@{/review/answer}" method="post">
+                <input type="hidden" name="wordId" th:value="${userWord.word.id}">
+                <button type="submit" name="known" value="true" class="btn btn-primary px-4">认识</button>
+                <button type="submit" name="known" value="false" class="btn btn-outline-secondary px-4">不认识</button>
+            </form>
+        </div>
+    </th:block>
 
-    if (speakButton) {
-        speakButton.addEventListener('click', function () {
-            const utterance = new SpeechSynthesisUtterance(speakButton.dataset.word);
-            utterance.lang = 'en-US';
-            speechSynthesis.cancel();
-            speechSynthesis.speak(utterance);
-        });
-    }
+    <!-- 没有到期的单词 -->
+    <div class="app-card p-5 text-center" th:unless="${userWord}">
+        <div class="fs-1 mb-2">✅</div>
+        <p class="mb-3">当前没有需要复习的单词</p>
+        <a class="btn btn-primary" th:href="@{/study}">去学习新单词</a>
+    </div>
 
-    if (toggleButton) {
-        toggleButton.addEventListener('click', function () {
-            meaning.hidden = !meaning.hidden;
-            toggleButton.textContent = meaning.hidden ? '显示释义' : '隐藏释义';
-        });
-    }
+</main>
 
-    if (answerForm) {
-        let submitted = false;
-        answerForm.addEventListener('submit', function (event) {
-            if (submitted) {
-                event.preventDefault();
-            }
-            submitted = true;
-        });
-    }
-</script>
+<th:block th:replace="~{fragments/common :: scripts}"></th:block>
 </body>
 </html>

@@ -82,3 +82,18 @@ body {
 a {
     color: var(--app-blue);
 }
+
+/* ==================== 胶囊导航、分页：使用主题色 ==================== */
+.nav-pills {
+    --bs-nav-pills-link-active-bg: var(--app-pink);
+}
+
+.nav-pills .nav-link {
+    color: var(--app-text);
+}
+
+.pagination {
+    --bs-pagination-active-bg: var(--app-pink);
+    --bs-pagination-active-border-color: var(--app-pink);
+    --bs-pagination-color: var(--app-text);
+}

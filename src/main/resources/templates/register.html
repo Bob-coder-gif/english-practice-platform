@@ -1,39 +1,46 @@
 <!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>注册 - 英语练习打卡平台</title>
-    <style>
-        .error { color: red; font-size: 14px; }
-        .field { margin-bottom: 12px; }
-    </style>
-</head>
+<head th:replace="~{fragments/common :: head('注册')}"></head>
 <body>
-<h1>注册</h1>
+<nav th:replace="~{fragments/common :: navbar}"></nav>
 
-<form th:action="@{/register}" th:object="${registerForm}" method="post">
+<main class="container">
+    <div class="app-card p-4 mx-auto" style="max-width: 420px;">
+        <h1 class="h4 mb-4 text-center">注册</h1>
 
-    <div class="field">
-        <label for="username">用户名：</label>
-        <input type="text" id="username" th:field="*{username}" placeholder="3~20 位字母、数字或下划线">
-        <div class="error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">用户名错误</div>
+        <form th:action="@{/register}" th:object="${registerForm}" method="post" novalidate>
+            <div class="mb-3">
+                <label for="username" class="form-label">用户名</label>
+                <input type="text" id="username" class="form-control"
+                       th:field="*{username}" th:errorclass="is-invalid">
+                <div class="form-text">3～20 位字母、数字或下划线</div>
+                <div class="invalid-feedback" th:errors="*{username}">[用户名错误]</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">密码</label>
+                <input type="password" id="password" name="password" class="form-control"
+                       th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'">
+                <div class="form-text">6～32 位</div>
+                <div class="invalid-feedback" th:errors="*{password}">[密码错误]</div>
+            </div>
+
+            <div class="mb-4">
+                <label for="confirmPassword" class="form-label">确认密码</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" class="form-control"
+                       th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'">
+                <div class="invalid-feedback" th:errors="*{confirmPassword}">[确认密码错误]</div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">注册</button>
+        </form>
+
+        <p class="text-center text-muted-app mt-3 mb-0">
+            已有账号？<a th:href="@{/login}">去登录</a>
+        </p>
     </div>
+</main>
 
-    <div class="field">
-        <label for="password">密码：</label>
-        <input type="password" id="password" name="password" placeholder="6~32 位">
-        <div class="error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">密码错误</div>
-    </div>
-
-    <div class="field">
-        <label for="confirmPassword">确认密码：</label>
-        <input type="password" id="confirmPassword" name="confirmPassword">
-        <div class="error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}">确认密码错误</div>
-    </div>
-
-    <button type="submit">注册</button>
-</form>
-
-<p><a th:href="@{/}">返回首页</a></p>
+<th:block th:replace="~{fragments/common :: scripts}"></th:block>
 </body>
 </html>

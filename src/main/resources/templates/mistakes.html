@@ -1,74 +1,82 @@
 <!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>错题本 - 英语练习打卡平台</title>
-    <style>
-        table { border-collapse: collapse; margin-top: 16px; }
-        th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; vertical-align: top; }
-        .phonetic { color: #666; }
-        .meaning { white-space: pre-line; }
-        .count { text-align: center; }
-        .pager { margin-top: 16px; }
-        .pager a, .pager span { margin-right: 12px; }
-    </style>
-</head>
+<head th:replace="~{fragments/common :: head('错题本')}"></head>
 <body>
-<h1>错题本</h1>
-<p><a th:href="@{/}">返回首页</a> | <a th:href="@{/review}">去复习</a></p>
+<nav th:replace="~{fragments/common :: navbar}"></nav>
 
-<p>
-    共 <span th:text="${mistakePage.totalElements}">0</span> 个待攻克的单词，按不认识的次数排序。
-    复习时连续认识 <span th:text="${T(com.jay.englishpracticeplatform.service.StudyService).MASTERED_STREAK}">3</span> 次后，会自动移出错题本。
-</p>
+<main class="container">
 
-<table th:if="${mistakePage.totalElements > 0}">
-    <thead>
-    <tr>
-        <th>单词</th>
-        <th>音标</th>
-        <th>释义</th>
-        <th>不认识</th>
-        <th>认识</th>
-        <th>连续认识</th>
-        <th>下次复习</th>
-        <th>发音</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="uw : ${mistakePage.content}">
-        <td th:text="${uw.word.spelling}">[单词]</td>
-        <td class="phonetic">
-            <span th:if="${uw.word.phonetic}" th:text="'/' + ${uw.word.phonetic} + '/'">[音标]</span>
-        </td>
-        <td class="meaning" th:text="${uw.word.meaning}">[释义]</td>
-        <td class="count" th:text="${uw.unknownCount}">0</td>
-        <td class="count" th:text="${uw.knownCount}">0</td>
-        <td class="count" th:text="${uw.streak}">0</td>
-        <td th:text="${#temporals.format(uw.nextReviewAt, 'yyyy-MM-dd HH:mm')}">[时间]</td>
-        <td><button type="button" class="speak" th:data-word="${uw.word.spelling}">🔊</button></td>
-    </tr>
-    </tbody>
-</table>
+    <div class="app-card p-3 mb-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div>
+            共 <strong th:text="${mistakePage.totalElements}">0</strong> 个待攻克的单词
+            <span class="text-muted-app small">
+                · 复习时连续认识 <span th:text="${masteredStreak}">3</span> 次后自动移出
+            </span>
+        </div>
+        <a class="btn btn-sm btn-primary" th:href="@{/review}">去复习</a>
+    </div>
 
-<p th:if="${mistakePage.totalElements == 0}">🎉 还没有不认识的单词。</p>
+    <div class="app-card p-3" th:if="${mistakePage.totalElements > 0}">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                <tr>
+                    <th>单词</th>
+                    <th>释义</th>
+                    <th class="text-center">不认识</th>
+                    <th class="text-center">连续认识</th>
+                    <th>下次复习</th>
+                    <th style="width: 60px;"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="uw : ${mistakePage.content}">
+                    <td>
+                        <div class="fw-semibold" th:text="${uw.word.spelling}">[单词]</div>
+                        <div class="phonetic small" th:if="${uw.word.phonetic}"
+                             th:text="'/' + ${uw.word.phonetic} + '/'">[音标]</div>
+                    </td>
+                    <td class="meaning" th:text="${uw.word.meaning}">[释义]</td>
+                    <td class="text-center">
+                        <span class="badge text-bg-danger" th:text="${uw.unknownCount}">0</span>
+                    </td>
+                    <td class="text-center">
+                        <span th:text="${uw.streak}">0</span> / <span th:text="${masteredStreak}">3</span>
+                    </td>
+                    <td class="text-muted-app small"
+                        th:text="${#temporals.format(uw.nextReviewAt, 'MM-dd HH:mm')}">[时间]</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                th:data-speak="${uw.word.spelling}">🔊</button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-<!-- 分页 -->
-<div class="pager" th:if="${totalPages > 1}">
-    <a th:if="${currentPage > 1}" th:href="@{/mistakes(page=${currentPage - 1})}">上一页</a>
-    <span>第 <span th:text="${currentPage}">1</span> / <span th:text="${totalPages}">1</span> 页</span>
-    <a th:if="${currentPage < totalPages}" th:href="@{/mistakes(page=${currentPage + 1})}">下一页</a>
-</div>
+    <div class="app-card p-5 text-center" th:if="${mistakePage.totalElements == 0}">
+        <div class="fs-1 mb-2">🎉</div>
+        <p class="mb-0">错题本是空的，继续保持！</p>
+    </div>
 
-<script>
-    document.querySelectorAll('.speak').forEach(function (button) {
-        button.addEventListener('click', function () {
-            const utterance = new SpeechSynthesisUtterance(button.dataset.word);
-            utterance.lang = 'en-US';
-            speechSynthesis.cancel();
-            speechSynthesis.speak(utterance);
-        });
-    });
-</script>
+    <!-- 分页 -->
+    <ul class="pagination justify-content-center my-3" th:if="${totalPages > 1}">
+        <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+            <a class="page-link" th:href="@{/mistakes(page=${currentPage - 1})}">上一页</a>
+        </li>
+        <li class="page-item active">
+            <span class="page-link">
+                <span th:text="${currentPage}">1</span> / <span th:text="${totalPages}">1</span>
+            </span>
+        </li>
+        <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+            <a class="page-link" th:href="@{/mistakes(page=${currentPage + 1})}">下一页</a>
+        </li>
+    </ul>
+
+</main>
+
+<th:block th:replace="~{fragments/common :: scripts}"></th:block>
 </body>
 </html>

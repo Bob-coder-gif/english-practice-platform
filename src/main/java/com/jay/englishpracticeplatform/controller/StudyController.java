@@ -25,7 +25,6 @@ public class StudyController {
     public String study(@SessionAttribute(SessionKeys.LOGIN_USER) LoginUser loginUser,
                         @RequestParam(defaultValue = "CET4") WordLevel level,
                         Model model){
-        model.addAttribute("loginUser",loginUser);
         model.addAttribute("levels",WordLevel.values());
         model.addAttribute("currentLevel", level);
         model.addAttribute("learnedCount", studyService.countLearned(loginUser.id(),level));
