@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('听写')}"></head>
+<body>
+<nav th:replace="~{fragments/common :: navbar}"></nav>
+
+<main class="container" style="max-width: 640px;">
+
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}">[错误]</div>
+
+    <form class="app-card p-4" method="get">
+        <h1 class="h5 mb-4">听写</h1>
+
+        <div class="mb-4">
+            <label for="level" class="form-label">级别</label>
+            <select id="level" name="level" class="form-select">
+                <option th:each="lv : ${levels}"
+                        th:value="${lv}" th:text="${lv.label}"
+                        th:selected="${lv.name() == 'CET4'}">[级别]</option>
+            </select>
+        </div>
+
+        <div class="mb-4">
+            <div class="form-label">单词来源</div>
+            <div class="btn-group" role="group">
+                <th:block th:each="s : ${sources}">
+                    <input type="radio" class="btn-check" name="source"
+                           th:id="'source-' + ${s}" th:value="${s}" th:checked="${s.name() == 'ALL'}">
+                    <label class="btn btn-outline-secondary" th:for="'source-' + ${s}" th:text="${s.label}">[来源]</label>
+                </th:block>
+            </div>
+            <div class="form-text">选择「错题本」时，会从全部级别的错题中出题</div>
+        </div>
+
+        <div class="mb-4">
+            <div class="form-label">单词数量</div>
+            <div class="btn-group" role="group">
+                <th:block th:each="c : ${counts}">
+                    <input type="radio" class="btn-check" name="count"
+                           th:id="'count-' + ${c}" th:value="${c}" th:checked="${c == 20}">
+                    <label class="btn btn-outline-secondary" th:for="'count-' + ${c}" th:text="${c} + ' 个'">[数量]</label>
+                </th:block>
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            <button type="submit" class="btn btn-primary" th:formaction="@{/dictation/en}">
+                听写英语<span class="small opacity-75">（看中文写英文）</span>
+            </button>
+            <button type="submit" class="btn btn-info" th:formaction="@{/dictation/cn}">
+                听写汉语<span class="small opacity-75">（看英文选中文）</span>
+            </button>
+        </div>
+    </form>
+
+</main>
+
+<th:block th:replace="~{fragments/common :: scripts}"></th:block>
+</body>
+</html>

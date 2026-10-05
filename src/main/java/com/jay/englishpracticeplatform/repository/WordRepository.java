@@ -32,4 +32,26 @@ public interface WordRepository extends JpaRepository<Word, Long>{
             order by w.spelling
             """)
     List<Word> findNewWords(WordLevel level, Long userId, Pageable pageable);
+
+    //某个级别中随机选出若干个单词的id
+    @Query(value = """
+            SELECT w.id FROM words w
+            JOIN word_levels l on l.word_id = w.id
+            WHERE l.level = :level
+            ORDER BY RAND()
+            LIMIT :limit
+            """, nativeQuery = true)
+    List<Long> findRandomIdsByLevel(String level, int limit);
+
+    //某个级别中，该用户学过的单词中随机选出若干个
+    @Query(value = """
+            SELECT w.id FROM words w
+            JOIN word_levels l ON l.word_id = w.id
+            JOIN user_words uw ON uw.word_id = w.id
+            WHERE l.level = :level AND uw.user_id = :userId
+            ORDER BY RAND()
+            LIMIT :limit
+            """, nativeQuery = true)
+    List<Long> findRandomLearnedIds(Long userId, String level, int limit);
+
 }

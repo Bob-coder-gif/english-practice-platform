@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('听写英语')}"></head>
+<body>
+<nav th:replace="~{fragments/common :: navbar}"></nav>
+
+<main class="container" style="max-width: 720px;">
+
+    <div class="app-card p-3 mb-3">
+        <span class="fw-semibold">听写英语</span>
+        <span class="text-muted-app small">
+            · <span th:text="${level.label}">[级别]</span>
+            · <span th:text="${source.label}">[来源]</span>
+            · 共 <span th:text="${#lists.size(questions)}">20</span> 题
+        </span>
+    </div>
+
+    <form th:action="@{/dictation/en}" method="post" data-submit-once>
+        <div class="app-card p-3 mb-2" th:each="q, stat : ${questions}">
+            <input type="hidden" th:name="|wordIds[${stat.index}]|" th:value="${q.wordId}">
+
+            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                <div>
+                    <span class="text-muted-app small" th:text="${stat.count} + '.'">1.</span>
+                    <span class="meaning" th:text="${q.meaning}">[释义]</span>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-secondary flex-shrink-0"
+                        th:data-speak="${q.spelling}">🔊</button>
+            </div>
+
+            <input type="text" class="form-control"
+                   th:name="|answers[${stat.index}]|"
+                   placeholder="输入英文拼写"
+                   autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+        </div>
+
+        <div class="d-grid my-4">
+            <button type="submit" class="btn btn-primary btn-lg">交卷</button>
+        </div>
+    </form>
+
+</main>
+
+<th:block th:replace="~{fragments/common :: scripts}"></th:block>
+</body>
+</html>

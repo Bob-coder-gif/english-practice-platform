@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('听写结果')}"></head>
+<body>
+<nav th:replace="~{fragments/common :: navbar}"></nav>
+
+<main class="container" style="max-width: 820px;">
+
+    <div class="app-card p-4 mb-3 text-center">
+        <div class="text-muted-app small mb-1" th:text="${result.mode.label} + ' · 结果'">[模式]</div>
+        <div class="display-6 fw-semibold">
+            <span th:text="${result.correctCount()}">0</span>
+            <span class="fs-4 text-muted-app">/ <span th:text="${result.total()}">0</span></span>
+        </div>
+        <div class="fs-5 mb-3" th:text="'正确率 ' + ${result.percent()} + '%'">正确率 0%</div>
+        <div class="d-flex justify-content-center gap-2">
+            <a class="btn btn-primary" th:href="@{/dictation}">再来一次</a>
+            <a class="btn btn-outline-secondary" th:href="@{/mistakes}">查看错题本</a>
+        </div>
+    </div>
+
+    <div class="app-card p-3 mb-4">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                <tr>
+                    <th style="width: 40px;">#</th>
+                    <th>单词</th>
+                    <th>释义</th>
+                    <th>你的答案</th>
+                    <th style="width: 50px;"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="item, stat : ${result.items}"
+                    th:classappend="${item.correct} ? '' : 'table-danger'">
+                    <td class="text-muted-app" th:text="${stat.count}">1</td>
+                    <td>
+                        <div class="fw-semibold" th:text="${item.spelling}">[单词]</div>
+                        <div class="phonetic small" th:if="${item.phonetic}"
+                             th:text="'/' + ${item.phonetic} + '/'">[音标]</div>
+                    </td>
+                    <td class="meaning small" th:text="${item.meaning}">[释义]</td>
+                    <td class="meaning small">
+                        <span th:if="${item.userAnswer != ''}" th:text="${item.userAnswer}">[答案]</span>
+                        <span th:if="${item.userAnswer == ''}" class="text-muted-app">（未作答）</span>
+                    </td>
+                    <td class="text-center fs-5" th:text="${item.correct} ? '✓' : '✗'">✓</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<th:block th:replace="~{fragments/common :: scripts}"></th:block>
+</body>
+</html>

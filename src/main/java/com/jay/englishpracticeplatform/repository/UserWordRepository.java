@@ -69,4 +69,15 @@ public interface UserWordRepository extends JpaRepository< UserWord, Long> {
            
            """)
     long countMistakes(Long userId, int masteredStreak);
+
+    //错题本中随机选出若干个单词的 id
+    @Query(value = """
+            SELECT uw.word_id FROM user_words uw
+            WHERE uw.user_id = :userId
+                AND uw.unknown_count > 0
+                AND uw.streak < :masteredStreak
+            ORDER BY RAND()
+            LIMIT :limit
+            """, nativeQuery = true)
+    List<Long> findRandomMistakeWordIds(Long userId, int masteredStreak, int limit);
 }
