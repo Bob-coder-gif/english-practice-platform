@@ -34,12 +34,12 @@
                        th:classappend="${currentPath == '/review'} ? 'active'">复习</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/mistakes}"
-                       th:classappend="${currentPath == '/mistakes'} ? 'active'">错题本</a>
+                    <a class="nav-link" th:href="@{/dictation}"
+                       th:classappend="${#strings.startsWith(currentPath, '/dictation')} ? 'active'">听写</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/words}"
-                       th:classappend="${currentPath == '/words'} ? 'active'">单词列表</a>
+                    <a class="nav-link" th:href="@{/mistakes}"
+                       th:classappend="${currentPath == '/mistakes'} ? 'active'">错题本</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" th:href="@{/stats}"
@@ -50,8 +50,8 @@
                        th:classappend="${currentPath == '/checkin'} ? 'active'">打卡</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/dictation}"
-                       th:classappend="${#strings.startsWith(currentPath, '/dictation')} ? 'active'">听写</a>
+                    <a class="nav-link" th:href="@{/words}"
+                       th:classappend="${currentPath == '/words'} ? 'active'">单词列表</a>
                 </li>
             </ul>
 
