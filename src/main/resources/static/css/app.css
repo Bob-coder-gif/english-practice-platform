@@ -97,3 +97,70 @@ a {
     --bs-pagination-active-border-color: var(--app-pink);
     --bs-pagination-color: var(--app-text);
 }
+
+/* ==================== 打卡日历 ==================== */
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+}
+
+.calendar-head {
+    text-align: center;
+    font-size: 13px;
+    color: var(--app-text-muted);
+    padding-bottom: 4px;
+}
+
+.calendar-day {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.calendar-day .day-check {
+    position: absolute;
+    right: 4px;
+    bottom: 2px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* 不属于本月、以及未来的日子：淡化显示 */
+.calendar-day.out-of-month,
+.calendar-day.is-future {
+    opacity: 0.35;
+}
+
+/* 今天：粉色边框 */
+.calendar-day.is-today {
+    outline: 2px solid var(--app-pink);
+    outline-offset: 1px;
+}
+
+/* 颜色深浅：从浅灰到 B 站粉 */
+.heat-0 { background-color: #ebedf0; }
+.heat-1 { background-color: #fde2ea; }
+.heat-2 { background-color: #fbb6c9; }
+.heat-3 { background-color: #f98cab; color: #fff; }
+.heat-4 { background-color: var(--app-pink-dark); color: #fff; }
+
+.legend-box {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+}
+
+/* 超额完成：深粉色 */
+.text-pink {
+    color: var(--app-pink-dark);
+}
+
+.progress-bar.progress-bar-done {
+    background-color: var(--app-pink-dark);
+}

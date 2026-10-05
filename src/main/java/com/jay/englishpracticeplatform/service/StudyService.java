@@ -33,17 +33,19 @@ public class StudyService {
     private final UserRepository userRepository;
     private final UserWordRepository userWordRepository;
     private final AnswerRecordRepository answerRecordRepository;
+    private final CheckInService checkInService;
 
     public StudyService(WordRepository wordRepository,
                         UserRepository userRepository,
                         UserWordRepository userWordRepository,
-                        AnswerRecordRepository answerRecordRepository) {
+                        AnswerRecordRepository answerRecordRepository,
+                        CheckInService checkInService) {
         this.wordRepository = wordRepository;
         this.userRepository = userRepository;
         this.userWordRepository = userWordRepository;
         this.answerRecordRepository = answerRecordRepository;
+        this.checkInService = checkInService;
     }
-
     // 找出该用户在这个级别中，下一个还没学过的单词
     @Transactional(readOnly = true)
     public Optional<Word> nextNewWord(Long userId, WordLevel level) {
@@ -80,8 +82,12 @@ public class StudyService {
         userWordRepository.save(userWord);
 
         //写入答题记录
-        answerRecordRepository.save(new AnswerRecord(userRef,word,mode,known,now));
+        answerRecordRepository.save(new AnswerRecord(userRef, word, mode, known, now));
+
+        // 检查是否达到打卡目标
+        checkInService.checkInIfGoalReached(userId, now);
     }
+
 
     // 复习：下一个到期的单词
     @Transactional(readOnly = true)

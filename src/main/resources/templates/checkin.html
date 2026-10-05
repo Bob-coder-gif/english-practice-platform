@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('打卡')}"></head>
+<body>
+<nav th:replace="~{fragments/common :: navbar}"></nav>
+
+<main class="container" style="max-width: 760px;">
+
+    <div class="alert alert-success" th:if="${message}" th:text="${message}">[提示]</div>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}">[错误]</div>
+
+    <!-- 今日进度、连续天数、累计天数 -->
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <div class="app-card p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted-app small">今日进度</span>
+                    <span class="badge text-bg-success" th:if="${view.checkedInToday}">✓ 已打卡</span>
+                    <span class="small text-muted-app" th:unless="${view.checkedInToday}">
+                        还差 <span th:text="${view.remaining()}">20</span> 题
+                    </span>
+                </div>
+
+                <div class="d-flex align-items-baseline gap-2 mb-2">
+                    <span class="fs-3 fw-semibold" th:text="${view.todayCount}">0</span>
+                    <span class="text-muted-app">/ <span th:text="${view.goal}">20</span> 题</span>
+                    <span class="ms-auto fw-semibold"
+                          th:classappend="${view.goalReached()} ? 'text-pink'"
+                          th:text="${view.progressPercent()} + '%'">0%</span>
+                </div>
+
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar"
+                         th:classappend="${view.goalReached()} ? 'progress-bar-done'"
+                         th:style="'width: ' + ${view.progressBarPercent()} + '%'"></div>
+                </div>
+
+                <!-- 修改每日目标 -->
+                <form class="d-flex align-items-center gap-2 mt-3" th:action="@{/checkin/goal}" method="post">
+                    <label for="dailyGoal" class="small text-muted-app mb-0">每日目标</label>
+                    <input type="number" id="dailyGoal" name="dailyGoal"
+                           class="form-control form-control-sm" style="width: 90px;"
+                           th:min="${minGoal}" th:max="${maxGoal}" th:value="${view.goal}" required>
+                    <span class="small text-muted-app">题</span>
+                    <button type="submit" class="btn btn-sm btn-outline-secondary">保存</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="app-card p-3 h-100 text-center">
+                <div class="text-muted-app small">连续打卡</div>
+                <div class="fs-3 fw-semibold"><span th:text="${view.currentStreak}">0</span> 天</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="app-card p-3 h-100 text-center">
+                <div class="text-muted-app small">累计打卡</div>
+                <div class="fs-3 fw-semibold"><span th:text="${view.totalDays}">0</span> 天</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 日历 -->
+    <div class="app-card p-3 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a class="btn btn-sm btn-outline-secondary"
+               th:href="@{/checkin(month=${view.prevMonth})}"
+               th:classappend="${view.prevMonth == null} ? 'disabled'">‹ 上个月</a>
+            <span class="fw-semibold">
+                <span th:text="${view.month.year}">2026</span> 年
+                <span th:text="${view.month.monthValue}">10</span> 月
+            </span>
+            <a class="btn btn-sm btn-outline-secondary"
+               th:href="@{/checkin(month=${view.nextMonth})}"
+               th:classappend="${view.nextMonth == null} ? 'disabled'">下个月 ›</a>
+        </div>
+
+        <div class="calendar">
+            <!-- 星期标题 -->
+            <div class="calendar-head">一</div>
+            <div class="calendar-head">二</div>
+            <div class="calendar-head">三</div>
+            <div class="calendar-head">四</div>
+            <div class="calendar-head">五</div>
+            <div class="calendar-head">六</div>
+            <div class="calendar-head">日</div>
+
+            <!-- 日期格子：外层循环每一周，内层循环每一天 -->
+            <th:block th:each="week : ${view.weeks}">
+                <div th:each="day : ${week}"
+                     class="calendar-day"
+                     th:classappend="|heat-${day.level}
+                                     ${day.inMonth ? '' : 'out-of-month'}
+                                     ${day.today ? 'is-today' : ''}
+                                     ${day.future ? 'is-future' : ''}|"
+                     th:title="${#temporals.format(day.date, 'MM-dd')} + '：' + ${day.count} + ' 题'">
+                    <span class="day-number" th:text="${day.date.dayOfMonth}">1</span>
+                    <span class="day-check" th:if="${day.checkedIn}">✓</span>
+                </div>
+            </th:block>
+        </div>
+
+        <!-- 图例 -->
+        <div class="d-flex flex-wrap justify-content-end align-items-center gap-1 mt-3 small text-muted-app">
+            <span>少</span>
+            <span class="legend-box heat-0"></span>
+            <span class="legend-box heat-1"></span>
+            <span class="legend-box heat-2"></span>
+            <span class="legend-box heat-3"></span>
+            <span class="legend-box heat-4"></span>
+            <span>多</span>
+            <span class="ms-3">✓ 当天完成了目标</span>
+        </div>
+    </div>
+
+</main>
+
+<th:block th:replace="~{fragments/common :: scripts}"></th:block>
+</body>
+</html>

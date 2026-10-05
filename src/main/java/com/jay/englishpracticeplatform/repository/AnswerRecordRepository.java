@@ -47,6 +47,14 @@ public interface AnswerRecordRepository extends JpaRepository<AnswerRecord, Long
             """)
     SummaryView summarize(Long userId);
 
+    //某段时间内的答题总数
+    @Query("""
+            select count(ar) from AnswerRecord ar
+            where ar.user.id = :userId
+                and ar.answeredAt >= :start and ar.answeredAt < :end
+            """)
+    long countBetween(Long userId, LocalDateTime start, LocalDateTime end);
+
     // ========================统计查询的结果类型 ================
     interface ModeCountView{
         AnswerMode getMode();

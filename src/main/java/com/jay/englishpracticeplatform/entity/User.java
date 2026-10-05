@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 
@@ -31,4 +32,10 @@ public class User {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
+    public static final int DEFAULT_DAILY_GOAL = 20;
+
+    @ColumnDefault("20")
+    @Column(nullable = false)
+    private int dailyGoal = DEFAULT_DAILY_GOAL;
 }
