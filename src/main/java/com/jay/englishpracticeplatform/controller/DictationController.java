@@ -1,16 +1,17 @@
 package com.jay.englishpracticeplatform.controller;
 
-import com.jay.englishpracticeplatform.common.SessionKeys;
 import com.jay.englishpracticeplatform.dto.DictationQuestion;
 import com.jay.englishpracticeplatform.dto.DictationSource;
 import com.jay.englishpracticeplatform.dto.DictationSubmission;
-import com.jay.englishpracticeplatform.dto.LoginUser;
 import com.jay.englishpracticeplatform.entity.WordLevel;
+import com.jay.englishpracticeplatform.security.AuthUser;
 import com.jay.englishpracticeplatform.service.DictationService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 
 import java.util.List;
 
@@ -37,7 +38,7 @@ public class DictationController {
     // ==================== 出题 ====================
 
     @GetMapping("/en")
-    public String startEnglish(@SessionAttribute(SessionKeys.LOGIN_USER) LoginUser loginUser,
+    public String startEnglish(@AuthenticationPrincipal AuthUser loginUser,
                                @RequestParam WordLevel level,
                                @RequestParam DictationSource source,
                                @RequestParam int count,
@@ -46,7 +47,7 @@ public class DictationController {
     }
 
     @GetMapping("/cn")
-    public String startChinese(@SessionAttribute(SessionKeys.LOGIN_USER) LoginUser loginUser,
+    public String startChinese(@AuthenticationPrincipal AuthUser loginUser,
                                @RequestParam WordLevel level,
                                @RequestParam DictationSource source,
                                @RequestParam int count,
@@ -54,13 +55,13 @@ public class DictationController {
         return start(loginUser, level, source, count, true, "dictation-cn", model, redirectAttributes);
     }
 
-    private String start(LoginUser loginUser, WordLevel level, DictationSource source, int count,
+    private String start(AuthUser loginUser, WordLevel level, DictationSource source, int count,
                          boolean withOptions, String view,
                          Model model, RedirectAttributes redirectAttributes) {
         int safeCount = DictationService.COUNT_OPTIONS.contains(count) ? count : DictationService.DEFAULT_COUNT;
 
         List<DictationQuestion> questions =
-                dictationService.generate(loginUser.id(), level, source, safeCount, withOptions);
+                dictationService.generate(loginUser.getId(), level, source, safeCount, withOptions);
 
         if (questions.isEmpty()) {
             redirectAttributes.addFlashAttribute("error",
@@ -77,12 +78,12 @@ public class DictationController {
     // ==================== 提交和判卷 ====================
 
     @PostMapping("/en")
-    public String submitEnglish(@SessionAttribute(SessionKeys.LOGIN_USER) LoginUser loginUser,
+    public String submitEnglish(@AuthenticationPrincipal AuthUser loginUser,
                                 @ModelAttribute DictationSubmission submission,
                                 RedirectAttributes redirectAttributes) {
         try {
             redirectAttributes.addFlashAttribute("result",
-                    dictationService.judgeEnglish(loginUser.id(), submission));
+                    dictationService.judgeEnglish(loginUser.getId(), submission));
             return "redirect:/dictation/result";
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -91,12 +92,12 @@ public class DictationController {
     }
 
     @PostMapping("/cn")
-    public String submitChinese(@SessionAttribute(SessionKeys.LOGIN_USER) LoginUser loginUser,
+    public String submitChinese(@AuthenticationPrincipal AuthUser loginUser,
                                 @ModelAttribute DictationSubmission submission,
                                 RedirectAttributes redirectAttributes) {
         try {
             redirectAttributes.addFlashAttribute("result",
-                    dictationService.judgeChinese(loginUser.id(), submission));
+                    dictationService.judgeChinese(loginUser.getId(), submission));
             return "redirect:/dictation/result";
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());

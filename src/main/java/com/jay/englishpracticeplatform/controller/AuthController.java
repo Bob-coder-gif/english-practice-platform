@@ -1,22 +1,10 @@
 package com.jay.englishpracticeplatform.controller;
 
 import com.jay.englishpracticeplatform.dto.RegisterForm;
-import com.jay.englishpracticeplatform.service.UserService;
 import com.jay.englishpracticeplatform.exception.UsernameAlreadyExistsException;
-import com.jay.englishpracticeplatform.common.SessionKeys;
-import com.jay.englishpracticeplatform.dto.LoginForm;
-import com.jay.englishpracticeplatform.dto.LoginUser;
-import com.jay.englishpracticeplatform.entity.User;
-import com.jay.englishpracticeplatform.exception.InvalidCredentialsException;
-
-import jakarta.servlet.http.HttpSession;
+import com.jay.englishpracticeplatform.service.UserService;
 import jakarta.validation.Valid;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServlet;
-
-import org.springframework.expression.spel.ast.NullLiteral;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.InvalidIsolationLevelException;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -75,47 +63,7 @@ public class AuthController {
 
     //============== 登录 ====================
     @GetMapping("/login")
-    public String showLoginForm(Model model){
-        model.addAttribute("loginForm", new LoginForm());
+    public String showLoginForm(){
         return "login";
-    }
-
-    @PostMapping("/login")
-    public String login(@Valid @ModelAttribute LoginForm loginForm,
-                        BindingResult bindingResult,
-                        HttpServletRequest request,
-                        Model model){
-
-        if(bindingResult.hasErrors()){
-            return "login";
-        }
-
-        User user;
-        try{
-            user = userService.login(loginForm.getUsername(), loginForm.getPassword());
-        }
-        catch (InvalidCredentialsException e){
-            model.addAttribute("loginError", e.getMessage());
-            return "login";
-        }
-
-        // 获取当前 Session （没有创建一个）
-        HttpSession session = request.getSession();
-        // 登陆成功后更换 Session ID， 防止会话固定攻击
-        request.changeSessionId();
-        // 在 Session 里记录当前登陆的用户
-        session.setAttribute(SessionKeys.LOGIN_USER, new LoginUser(user.getId(), user.getUsername()));
-
-        return "redirect:/";
-    }
-
-    //================ 退出 ==================
-
-    @PostMapping("/logout")
-    public String logout(HttpSession session, RedirectAttributes redirectAttributes){
-        //销毁整个Session 里面的所有数据都会被清除
-        session.invalidate();
-        redirectAttributes.addFlashAttribute("message", "已退出登录");
-        return "redirect:/";
     }
 }

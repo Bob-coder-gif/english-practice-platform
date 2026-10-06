@@ -9,22 +9,17 @@
         <h1 class="h4 mb-4 text-center">登录</h1>
 
         <div class="alert alert-success" th:if="${message}" th:text="${message}">[提示信息]</div>
-        <div class="alert alert-warning" th:if="${param.required}">请先登录</div>
-        <div class="alert alert-danger" th:if="${loginError}" th:text="${loginError}">[登录错误]</div>
+        <div class="alert alert-danger" th:if="${param.error}">用户名或密码错误</div>
 
-        <form th:action="@{/login}" th:object="${loginForm}" method="post" novalidate>
+        <form th:action="@{/login}" method="post">
             <div class="mb-3">
                 <label for="username" class="form-label">用户名</label>
-                <input type="text" id="username" class="form-control"
-                       th:field="*{username}" th:errorclass="is-invalid">
-                <div class="invalid-feedback" th:errors="*{username}">[用户名错误]</div>
+                <input type="text" id="username" name="username" class="form-control" required autofocus>
             </div>
 
             <div class="mb-4">
                 <label for="password" class="form-label">密码</label>
-                <input type="password" id="password" name="password" class="form-control"
-                       th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'">
-                <div class="invalid-feedback" th:errors="*{password}">[密码错误]</div>
+                <input type="password" id="password" name="password" class="form-control" required>
             </div>
 
             <button type="submit" class="btn btn-primary w-100">登录</button>
