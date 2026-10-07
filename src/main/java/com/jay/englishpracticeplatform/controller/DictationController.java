@@ -14,6 +14,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/dictation")
@@ -43,7 +44,7 @@ public class DictationController {
                                @RequestParam DictationSource source,
                                @RequestParam int count,
                                Model model, RedirectAttributes redirectAttributes) {
-        return start(loginUser, level, source, count, false, "dictation-en", model, redirectAttributes);
+        return preview(loginUser, level, source, count, "en", "听写英语", model, redirectAttributes);
     }
 
     @GetMapping("/cn")
@@ -52,27 +53,62 @@ public class DictationController {
                                @RequestParam DictationSource source,
                                @RequestParam int count,
                                Model model, RedirectAttributes redirectAttributes) {
-        return start(loginUser, level, source, count, true, "dictation-cn", model, redirectAttributes);
+        return preview(loginUser, level, source, count, "cn", "听写汉语", model, redirectAttributes);
     }
 
-    private String start(AuthUser loginUser, WordLevel level, DictationSource source, int count,
-                         boolean withOptions, String view,
-                         Model model, RedirectAttributes redirectAttributes) {
+    private String preview(AuthUser loginUser, WordLevel level, DictationSource source,int count,
+                           String modePath, String modeLabel,
+                           Model model, RedirectAttributes redirectAttributes){
         int safeCount = DictationService.COUNT_OPTIONS.contains(count) ? count : DictationService.DEFAULT_COUNT;
+        List<DictationQuestion> words = dictationService.pickWords(loginUser.getId(),level,source,safeCount);
 
-        List<DictationQuestion> questions =
-                dictationService.generate(loginUser.getId(), level, source, safeCount, withOptions);
-
-        if (questions.isEmpty()) {
+        if(words.isEmpty()){
             redirectAttributes.addFlashAttribute("error",
-                    "「" + level.getLabel() + " · " + source.getLabel() + "」中没有可以听写的单词，换一个试试");
+                    "[" + level.getLabel() + " · " + source.getLabel() + "] 中没有可以听写的单词，换一个试试");
             return "redirect:/dictation";
         }
 
-        model.addAttribute("questions", questions);
-        model.addAttribute("level", level);
-        model.addAttribute("source", source);
-        return view;
+        model.addAttribute("words",words);
+        model.addAttribute("ids",words.stream()
+                .map(w -> String.valueOf(w.wordId()))
+                .collect(Collectors.joining(",")));
+        model.addAttribute("level",level);
+        model.addAttribute("source",source);
+        model.addAttribute("count",safeCount);
+        model.addAttribute("modePath",modePath);
+        model.addAttribute("modeLabel",modeLabel);
+        return "dictation-preview";
+    }
+
+    //==================答题页==========================
+
+    private String startTest(WordLevel level, List<Long> ids, boolean withOptions, String view,
+                             Model model, RedirectAttributes redirectAttributes){
+        try {
+            model.addAttribute("questions",dictationService.buildTest(ids,level,withOptions));
+            model.addAttribute("level",level);
+            return view;
+        }catch (IllegalArgumentException e){
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/dictation";
+        }
+    }
+
+    @GetMapping("/en/test")
+    public String testEnglish(@RequestParam WordLevel level,
+                              @RequestParam List<Long> ids,
+                              Model model,
+                              RedirectAttributes redirectAttributes){
+        return startTest(level,ids,false,"dictation-en",model,redirectAttributes);
+    }
+
+    @GetMapping("/cn/test")
+    public String testChinese (@RequestParam WordLevel level,
+                               @RequestParam List<Long> ids,
+                               Model model,
+                               RedirectAttributes redirectAttributes){
+        return startTest(level,ids,true ,"dictation-cn",model,redirectAttributes);
+
     }
 
     // ==================== 提交和判卷 ====================

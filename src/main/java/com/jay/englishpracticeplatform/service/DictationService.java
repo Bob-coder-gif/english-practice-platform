@@ -42,38 +42,46 @@ public class DictationService {
         this.studyService = studyService;
     }
 
-    // ====================出题==========================
+    //====================预习，随机选出一组单词============
 
-    public List<DictationQuestion> generate(Long userId, WordLevel level,DictationSource source,
-                                            int count, boolean withOptions){
+    @Transactional(readOnly = true)
+    public List<DictationQuestion> pickWords(Long userId, WordLevel level,DictationSource source, int count){
         List<Long> ids = switch (source){
-            case ALL -> wordRepository.findRandomIdsByLevel(level.name(),count);
+            case ALL -> wordRepository.findRandomIdsByLevel(level.name(), count);
             case LEARNED -> wordRepository.findRandomLearnedIds(userId,level.name(),count);
-            case MISTAKES -> userWordRepository.findRandomMistakeWordIds(
-                    userId, StudyService.MASTERED_STREAK, count
-                );
+            case MISTAKES -> userWordRepository.findRandomMistakeWordIds(userId,StudyService.MASTERED_STREAK,count);
         };
 
-        if(ids.isEmpty()){
-            return List.of();
+        List<DictationQuestion> words = new ArrayList<>();
+        for(Word word : findInOrder(ids)){
+            words.add(toQuestion(word,List.of()));
         }
+        return words;
+    }
 
-        List<Word> words = findInOrder(ids);
+    // ====================出题==========================
 
-        //听写安于需要干扰项，从同一级别中取一些单词作为候选
-        List<Word> pool = withOptions ?
-                findInOrder(wordRepository.findRandomIdsByLevel(level.name(),count * 3 + 10))
+    public List<DictationQuestion> buildTest(List<Long> wordIds, WordLevel level,boolean withOptions){
+        // 去掉重复的 id ，保留原来的顺序
+        List<Long> distinctIds = new ArrayList<>(new LinkedHashSet<>(wordIds));
+
+        // 打乱题目顺序
+        List<Word> words = new ArrayList<>(loadWords(distinctIds));
+        Collections.shuffle(words);
+
+        List<Word> pool = withOptions
+                ? findInOrder(wordRepository.findRandomIdsByLevel(level.name(),words.size() * 3 + 10))
                 : List.of();
 
         List<DictationQuestion> questions = new ArrayList<>();
-        for (Word word: words){
-            List<Option> options = withOptions ? buildOptions(word,pool) : List.of();
-            questions.add(new DictationQuestion(
-               word.getId(), word.getSpelling(), word.getPhonetic(), word.getMeaning(), options
-            ));
+        for (Word word : words){
+            questions.add(toQuestion(word,withOptions ? buildOptions(word, pool) : List.of()));
         }
-
         return questions;
+    }
+
+    private DictationQuestion toQuestion(Word word, List<Option> options){
+        return new DictationQuestion(word.getId(),word.getSpelling(),word.getPhonetic(),word.getMeaning(),options);
     }
 
     //生成四个选项，一个正确答案，三个干扰选项，再打乱顺序
@@ -113,44 +121,57 @@ public class DictationService {
             boolean correct = answer != null && normalize(answer).equals(normalize(word.getSpelling()));
 
             studyService.recordAnswer(userId, word.getId(), correct, AnswerMode.DICTATION_EN);
-            items.add(new DictationResult.Item(word.getSpelling(), word.getPhonetic(), word.getMeaning(),
-                    answer == null ? "" : answer.strip(), correct));
+            items.add(new DictationResult.Item(word.getId(),word.getSpelling(),word.getPhonetic(),word.getMeaning(),
+                    answer == null ? "" : answer.strip(),correct));
         }
-        return new DictationResult(AnswerMode.DICTATION_EN, items);
+        return new DictationResult(AnswerMode.DICTATION_EN, levelOf(submission) ,items);
     }
 
     @Transactional
-    public DictationResult judgeChinese(Long userId, DictationSubmission submission){
-        List<Word> words = loadSubmittedWords(submission);
+    public DictationResult judgeChinese(Long userId, DictationSubmission submission) {
+        List<Word> words = loadWords(submission.getWordIds());
 
-        //用户选中的选项，对应的是那些单词，一次性查出他们的释义，用于在结果页显示
         List<Long> chosenIds = new ArrayList<>();
-        for(int i = 0; i < words.size(); i++){
-            Long chosen = parseId(answerAt(submission,i));
-            if(chosen != null){
+        for (int i = 0; i < words.size(); i++) {
+            Long chosen = parseId(answerAt(submission, i));
+            if (chosen != null) {
                 chosenIds.add(chosen);
             }
         }
         Map<Long, String> meaningById = new HashMap<>();
-        for(Word w : wordRepository.findAllById(chosenIds)){
-            meaningById.put(w.getId(),w.getMeaning());
+        for (Word w : wordRepository.findAllById(chosenIds)) {
+            meaningById.put(w.getId(), w.getMeaning());
         }
 
         List<DictationResult.Item> items = new ArrayList<>();
-        for(int i = 0; i < words.size(); i++){
+        for (int i = 0; i < words.size(); i++) {
             Word word = words.get(i);
             Long chosen = parseId(answerAt(submission, i));
             boolean correct = word.getId().equals(chosen);
 
             studyService.recordAnswer(userId, word.getId(), correct, AnswerMode.DICTATION_CN);
-            items.add(new DictationResult.Item(word.getSpelling(),word.getPhonetic(),word.getMeaning(),
-                    chosen == null ? "" : meaningById.getOrDefault(chosen,""), correct));
+            items.add(new DictationResult.Item(word.getId(), word.getSpelling(), word.getPhonetic(),
+                    word.getMeaning(), chosen == null ? "" : meaningById.getOrDefault(chosen, ""), correct));
         }
-
-        return new DictationResult(AnswerMode.DICTATION_CN, items);
+        return new DictationResult(AnswerMode.DICTATION_CN, levelOf(submission), items);
     }
 
     //==============工具方法===================
+
+    private List<Word> loadWords(List<Long> ids){
+        if(ids == null || ids.isEmpty() || ids.size() > MAX_QUESTIONS){
+            throw new IllegalArgumentException("题目数量不合法");
+        }
+        List<Word> words = findInOrder(ids);
+        if(words.size() != ids.size()){
+            throw new IllegalArgumentException("题目中包含不存在的单词");
+        }
+        return words;
+    }
+
+    private WordLevel levelOf(DictationSubmission submission){
+        return submission.getLevel() == null ? WordLevel.CET4 : submission.getLevel();
+    }
 
     //统一格式，起吊首尾空格，多个空格合并为一个，转为小写
     public static String normalize(String text){

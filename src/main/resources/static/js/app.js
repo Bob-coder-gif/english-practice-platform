@@ -79,3 +79,28 @@ document.querySelectorAll('form[data-submit-once]').forEach(function (form) {
 
     render();
 })();
+
+// ==================== 自动发音 ====================
+// 页面上带 data-autospeak 的元素：页面加载后自动朗读一次
+// 「看中文想英文」模式下不自动朗读，否则等于直接说出了答案
+(function () {
+    const target = document.querySelector('[data-autospeak]');
+    if (!target || !('speechSynthesis' in window)) {
+        return;
+    }
+
+    let mode = 'show-en';
+    try {
+        mode = localStorage.getItem('studyMode') || 'show-en';
+    } catch (e) {
+        // 读不到就按默认模式处理
+    }
+    if (target.closest('[data-flashcard]') && mode === 'show-cn') {
+        return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(target.dataset.autospeak);
+    utterance.lang = 'en-US';
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utterance);
+})();

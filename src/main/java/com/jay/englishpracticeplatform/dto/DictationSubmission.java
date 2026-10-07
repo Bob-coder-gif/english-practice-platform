@@ -1,5 +1,7 @@
 package com.jay.englishpracticeplatform.dto;
 
+import com.jay.englishpracticeplatform.entity.WordLevel;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,6 +11,9 @@ import java.util.List;
 @Getter
 @Setter
 public class DictationSubmission {
+
+    //这次听写的级别，汉语听写[再来一次]是生成干扰项
+    private WordLevel level = WordLevel.CET4;
 
     //第 i 道题单词的 id
     private List<Long> wordIds = new ArrayList<>();

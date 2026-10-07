@@ -3,7 +3,6 @@ package com.jay.englishpracticeplatform;
 import com.jay.englishpracticeplatform.dto.*;
 import com.jay.englishpracticeplatform.entity.*;
 import com.jay.englishpracticeplatform.repository.AnswerRecordRepository;
-import com.jay.englishpracticeplatform.repository.UserWordRepository;
 import com.jay.englishpracticeplatform.service.DictationService;
 import com.jay.englishpracticeplatform.service.StudyService;
 import com.jay.englishpracticeplatform.service.UserService;
@@ -25,12 +24,15 @@ class DictationServiceTest {
     @Autowired private DictationService dictationService;
     @Autowired private StudyService studyService;
     @Autowired private UserService userService;
-    @Autowired private UserWordRepository userWordRepository;
     @Autowired private AnswerRecordRepository answerRecordRepository;
 
-    // 把题目的单词 id 放进提交对象
+    private List<Long> idsOf(List<DictationQuestion> questions) {
+        return questions.stream().map(DictationQuestion::wordId).toList();
+    }
+
     private DictationSubmission submissionOf(List<DictationQuestion> questions) {
         DictationSubmission submission = new DictationSubmission();
+        submission.setLevel(WordLevel.CET4);
         questions.forEach(q -> submission.getWordIds().add(q.wordId()));
         return submission;
     }
@@ -42,25 +44,47 @@ class DictationServiceTest {
     }
 
     @Test
-    void generateReturnsRequestedNumberOfDistinctWords() {
-        User user = userService.register("dict_gen", "123456");
+    void pickWordsReturnsDistinctWordsWithoutOptions() {
+        User user = userService.register("dict_pick", "123456");
 
-        List<DictationQuestion> questions =
-                dictationService.generate(user.getId(), WordLevel.CET4, DictationSource.ALL, 20, false);
+        List<DictationQuestion> words =
+                dictationService.pickWords(user.getId(), WordLevel.CET4, DictationSource.ALL, 20);
 
-        assertEquals(20, questions.size());
-        assertEquals(20, new HashSet<>(questions.stream().map(DictationQuestion::wordId).toList()).size());
-        assertTrue(questions.get(0).options().isEmpty());
+        assertEquals(20, words.size());
+        assertEquals(20, new HashSet<>(idsOf(words)).size());
+        assertTrue(words.get(0).options().isEmpty());
     }
 
     @Test
-    void chineseQuestionsHaveFourDistinctOptionsIncludingAnswer() {
+    void newUserHasNoMistakesToDictate() {
+        User user = userService.register("dict_empty", "123456");
+
+        assertTrue(dictationService
+                .pickWords(user.getId(), WordLevel.CET4, DictationSource.MISTAKES, 20)
+                .isEmpty());
+    }
+
+    @Test
+    void buildTestUsesSameWordsAsPreview() {
+        User user = userService.register("dict_same", "123456");
+        List<DictationQuestion> preview =
+                dictationService.pickWords(user.getId(), WordLevel.CET4, DictationSource.ALL, 20);
+
+        List<DictationQuestion> test = dictationService.buildTest(idsOf(preview), WordLevel.CET4, false);
+
+        // 题目是同一组单词（顺序可能被打乱）
+        assertEquals(new HashSet<>(idsOf(preview)), new HashSet<>(idsOf(test)));
+    }
+
+    @Test
+    void chineseTestHasFourDistinctOptionsIncludingAnswer() {
         User user = userService.register("dict_options", "123456");
+        List<DictationQuestion> preview =
+                dictationService.pickWords(user.getId(), WordLevel.CET4, DictationSource.ALL, 20);
 
-        List<DictationQuestion> questions =
-                dictationService.generate(user.getId(), WordLevel.CET4, DictationSource.ALL, 20, true);
+        List<DictationQuestion> test = dictationService.buildTest(idsOf(preview), WordLevel.CET4, true);
 
-        for (DictationQuestion q : questions) {
+        for (DictationQuestion q : test) {
             List<Long> optionIds = q.options().stream().map(DictationQuestion.Option::wordId).toList();
             assertEquals(4, optionIds.size());
             assertEquals(4, new HashSet<>(optionIds).size());
@@ -69,49 +93,57 @@ class DictationServiceTest {
     }
 
     @Test
-    void newUserHasNoMistakesToDictate() {
-        User user = userService.register("dict_empty", "123456");
+    void buildTestRejectsInvalidIds() {
+        List<Long> tooMany = IntStream.rangeClosed(1, DictationService.MAX_QUESTIONS + 1)
+                .mapToObj(i -> (long) i).toList();
 
-        assertTrue(dictationService
-                .generate(user.getId(), WordLevel.CET4, DictationSource.MISTAKES, 20, false)
-                .isEmpty());
+        assertThrows(IllegalArgumentException.class,
+                () -> dictationService.buildTest(tooMany, WordLevel.CET4, false));
+        assertThrows(IllegalArgumentException.class,
+                () -> dictationService.buildTest(List.of(-1L), WordLevel.CET4, false));
+        assertThrows(IllegalArgumentException.class,
+                () -> dictationService.buildTest(List.of(), WordLevel.CET4, false));
     }
 
     @Test
-    void judgeEnglishRecordsEveryAnswer() {
+    void judgeEnglishRecordsEveryAnswerAndSupportsRetry() {
         User user = userService.register("dict_en", "123456");
-        List<DictationQuestion> questions =
-                dictationService.generate(user.getId(), WordLevel.CET4, DictationSource.ALL, 20, false);
+        List<DictationQuestion> questions = dictationService.buildTest(
+                idsOf(dictationService.pickWords(user.getId(), WordLevel.CET4, DictationSource.ALL, 20)),
+                WordLevel.CET4, false);
 
         DictationSubmission submission = submissionOf(questions);
-        submission.getAnswers().add("  " + questions.get(0).spelling().toUpperCase() + "  ");  // 大小写、空格不同：算对
-        submission.getAnswers().add("wrong_answer");                                           // 写错了
-        // 其余 18 题没有作答
+        submission.getAnswers().add("  " + questions.get(0).spelling().toUpperCase() + "  ");
+        submission.getAnswers().add("wrong_answer");
 
         DictationResult result = dictationService.judgeEnglish(user.getId(), submission);
 
         assertEquals(20, result.total());
         assertEquals(1, result.correctCount());
+        assertFalse(result.perfect());
+        assertEquals(WordLevel.CET4, result.level());
 
-        // 每道题都写入了答题记录，模式是听写英语
+        // 「只练答错的」：19 个 id，不包含答对的那一个
+        List<String> wrongIds = List.of(result.wrongIds().split(","));
+        assertEquals(19, wrongIds.size());
+        assertFalse(wrongIds.contains(String.valueOf(questions.get(0).wordId())));
+
+        // 每道题都写入了答题记录
         List<AnswerRecord> records = answerRecordRepository.findByUserIdOrderByIdAsc(user.getId());
         assertEquals(20, records.size());
         assertTrue(records.stream().allMatch(r -> r.getMode() == AnswerMode.DICTATION_EN));
-
-        // 答错和没作答的 19 个单词，都进入了错题本
         assertEquals(19, studyService.listMistakes(user.getId(), 0).getTotalElements());
     }
 
     @Test
     void judgeChineseUsesChosenOption() {
         User user = userService.register("dict_cn", "123456");
-        List<DictationQuestion> questions =
-                dictationService.generate(user.getId(), WordLevel.CET4, DictationSource.ALL, 20, true);
+        List<DictationQuestion> questions = dictationService.buildTest(
+                idsOf(dictationService.pickWords(user.getId(), WordLevel.CET4, DictationSource.ALL, 20)),
+                WordLevel.CET4, true);
 
         DictationSubmission submission = submissionOf(questions);
-        // 第 1 题选正确答案
         submission.getAnswers().add(String.valueOf(questions.get(0).wordId()));
-        // 第 2 题选一个错误的选项
         Long wrong = questions.get(1).options().stream()
                 .map(DictationQuestion.Option::wordId)
                 .filter(id -> !id.equals(questions.get(1).wordId()))
@@ -123,18 +155,23 @@ class DictationServiceTest {
         assertEquals(1, result.correctCount());
         assertTrue(result.items().get(0).correct());
         assertFalse(result.items().get(1).correct());
-        // 错误的那题，结果里显示的是用户选中的那个释义
         assertFalse(result.items().get(1).userAnswer().isEmpty());
     }
 
     @Test
-    void tooManyQuestionsAreRejected() {
-        User user = userService.register("dict_limit", "123456");
-        DictationSubmission submission = new DictationSubmission();
-        IntStream.rangeClosed(1, DictationService.MAX_QUESTIONS + 1)
-                .forEach(i -> submission.getWordIds().add((long) i));
+    void perfectResultHasNoWrongIds() {
+        User user = userService.register("dict_perfect", "123456");
+        List<DictationQuestion> questions = dictationService.buildTest(
+                idsOf(dictationService.pickWords(user.getId(), WordLevel.CET4, DictationSource.ALL, 20)),
+                WordLevel.CET4, false);
 
-        assertThrows(IllegalArgumentException.class,
-                () -> dictationService.judgeEnglish(user.getId(), submission));
+        DictationSubmission submission = submissionOf(questions);
+        questions.forEach(q -> submission.getAnswers().add(q.spelling()));
+
+        DictationResult result = dictationService.judgeEnglish(user.getId(), submission);
+
+        assertTrue(result.perfect());
+        assertEquals(100, result.percent());
+        assertEquals("", result.wrongIds());
     }
 }

@@ -4,7 +4,7 @@
 <body>
 <nav th:replace="~{fragments/common :: navbar}"></nav>
 
-<main class="container" style="max-width: 820px;">
+<main class="container" style="max-width: 860px;">
 
     <div class="app-card p-4 mb-3 text-center">
         <div class="text-muted-app small mb-1" th:text="${result.mode.label} + ' · 结果'">[模式]</div>
@@ -13,9 +13,24 @@
             <span class="fs-4 text-muted-app">/ <span th:text="${result.total()}">0</span></span>
         </div>
         <div class="fs-5 mb-3" th:text="'正确率 ' + ${result.percent()} + '%'">正确率 0%</div>
-        <div class="d-flex justify-content-center gap-2">
-            <a class="btn btn-primary" th:href="@{/dictation}">再来一次</a>
-            <a class="btn btn-outline-secondary" th:href="@{/mistakes}">查看错题本</a>
+
+        <!-- 没有全对：再来一次 -->
+        <div class="d-flex flex-wrap justify-content-center gap-2" th:unless="${result.perfect()}">
+            <a class="btn btn-primary"
+               th:href="@{/dictation/{mode}/test(mode=${result.modePath()}, level=${result.level}, ids=${result.allIds()})}">
+                再听写一次这组
+            </a>
+            <a class="btn btn-outline-primary"
+               th:href="@{/dictation/{mode}/test(mode=${result.modePath()}, level=${result.level}, ids=${result.wrongIds()})}">
+                只练答错的 <span th:text="${result.wrongCount()}">0</span> 个
+            </a>
+            <a class="btn btn-outline-secondary" th:href="@{/dictation}">换一组新单词</a>
+        </div>
+
+        <!-- 全对 -->
+        <div th:if="${result.perfect()}">
+            <div class="mb-3">🎉 全部正确！</div>
+            <a class="btn btn-primary" th:href="@{/dictation}">换一组新单词</a>
         </div>
     </div>
 
@@ -28,6 +43,7 @@
                     <th>单词</th>
                     <th>释义</th>
                     <th>你的答案</th>
+                    <th style="width: 50px;"></th>
                     <th style="width: 50px;"></th>
                 </tr>
                 </thead>
@@ -44,6 +60,10 @@
                     <td class="meaning small">
                         <span th:if="${item.userAnswer != ''}" th:text="${item.userAnswer}">[答案]</span>
                         <span th:if="${item.userAnswer == ''}" class="text-muted-app">（未作答）</span>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                th:data-speak="${item.spelling}">🔊</button>
                     </td>
                     <td class="text-center fs-5" th:text="${item.correct} ? '✓' : '✗'">✓</td>
                 </tr>

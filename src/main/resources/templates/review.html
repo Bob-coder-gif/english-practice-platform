@@ -24,7 +24,8 @@
                 <div class="phonetic mb-2" th:if="${userWord.word.phonetic}"
                      th:text="'/' + ${userWord.word.phonetic} + '/'">[音标]</div>
                 <button type="button" class="btn btn-sm btn-outline-secondary"
-                        th:data-speak="${userWord.word.spelling}">🔊 发音</button>
+                        th:data-speak="${userWord.word.spelling}"
+                        th:data-autospeak="${userWord.word.spelling}">🔊 发音</button>
             </div>
 
             <div data-side="cn" class="meaning mt-3 fs-5" hidden th:text="${userWord.word.meaning}">[释义]</div>
