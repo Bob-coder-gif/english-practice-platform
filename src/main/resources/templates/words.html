@@ -6,23 +6,44 @@
 
 <main class="container">
 
-    <!-- 级别切换 -->
+    <!-- 级别切换：「全部」+ 各级别，切换时保留搜索词 -->
     <ul class="nav nav-pills mb-3">
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/words(q=${q})}"
+               th:classappend="${currentLevel == null} ? 'active'">全部</a>
+        </li>
         <li class="nav-item" th:each="lv : ${levels}">
             <a class="nav-link"
-               th:href="@{/words(level=${lv})}"
+               th:href="@{/words(level=${lv}, q=${q})}"
                th:text="${lv.label}"
                th:classappend="${lv == currentLevel} ? 'active'">[级别]</a>
         </li>
     </ul>
 
+    <!-- 搜索 -->
+    <form class="mb-3" th:action="@{/words}" method="get">
+        <input type="hidden" name="level" th:if="${currentLevel != null}" th:value="${currentLevel}">
+        <div class="input-group" style="max-width: 460px;">
+            <input type="search" name="q" class="form-control"
+                   placeholder="输入英文或中文，如 ban、放弃"
+                   th:value="${q}"
+                   th:maxlength="${T(com.jay.englishpracticeplatform.service.WordService).MAX_KEYWORD_LENGTH}"
+                   autocomplete="off" autocapitalize="off" spellcheck="false">
+            <button type="submit" class="btn btn-primary">搜索</button>
+            <a class="btn btn-outline-secondary" th:if="${q != ''}"
+               th:href="@{/words(level=${currentLevel})}">清除</a>
+        </div>
+    </form>
+
     <div class="app-card p-3">
         <p class="text-muted-app mb-2">
-            <span th:text="${currentLevel.label}">[级别]</span>
-            共 <span th:text="${wordPage.totalElements}">0</span> 个单词
+            <span th:text="${currentLevel != null} ? ${currentLevel.label} : '全部级别'">[级别]</span>
+            <th:block th:if="${q != ''}">中包含「<span th:text="${q}">[关键词]</span>」的单词</th:block>
+            共 <span th:text="${wordPage.totalElements}">0</span> 个
         </p>
 
-        <div class="table-responsive">
+        <!-- data-highlight：告诉 app.js 要高亮的关键词 -->
+        <div class="table-responsive" th:if="${wordPage.totalElements > 0}" th:data-highlight="${q}">
             <table class="table table-hover align-middle mb-0">
                 <thead>
                 <tr>
@@ -34,11 +55,12 @@
                 </thead>
                 <tbody>
                 <tr th:each="w : ${wordPage.content}">
-                    <td class="fw-semibold" th:text="${w.spelling}">[单词]</td>
+                    <!-- data-highlight-text：这一格里的匹配文字需要高亮 -->
+                    <td class="fw-semibold" data-highlight-text th:text="${w.spelling}">[单词]</td>
                     <td class="phonetic">
                         <span th:if="${w.phonetic}" th:text="'/' + ${w.phonetic} + '/'">[音标]</span>
                     </td>
-                    <td class="meaning" th:text="${w.meaning}">[释义]</td>
+                    <td class="meaning" data-highlight-text th:text="${w.meaning}">[释义]</td>
                     <td>
                         <button type="button" class="btn btn-sm btn-outline-secondary"
                                 th:data-speak="${w.spelling}">🔊</button>
@@ -47,16 +69,21 @@
                 </tbody>
             </table>
         </div>
+
+        <div class="text-center text-muted-app py-4" th:if="${wordPage.totalElements == 0}">
+            没有找到匹配的单词。可以换个关键词试试，或者切换到「全部」级别。
+        </div>
     </div>
 
-    <!-- 分页 -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 my-3">
+    <!-- 分页：所有链接都带上级别和搜索词 -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 my-3"
+         th:if="${totalPages > 1}">
         <ul class="pagination mb-0">
             <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
-                <a class="page-link" th:href="@{/words(level=${currentLevel}, page=1)}">首页</a>
+                <a class="page-link" th:href="@{/words(level=${currentLevel}, q=${q}, page=1)}">首页</a>
             </li>
             <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
-                <a class="page-link" th:href="@{/words(level=${currentLevel}, page=${currentPage - 1})}">上一页</a>
+                <a class="page-link" th:href="@{/words(level=${currentLevel}, q=${q}, page=${currentPage - 1})}">上一页</a>
             </li>
             <li class="page-item active">
                 <span class="page-link">
@@ -64,15 +91,16 @@
                 </span>
             </li>
             <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
-                <a class="page-link" th:href="@{/words(level=${currentLevel}, page=${currentPage + 1})}">下一页</a>
+                <a class="page-link" th:href="@{/words(level=${currentLevel}, q=${q}, page=${currentPage + 1})}">下一页</a>
             </li>
             <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
-                <a class="page-link" th:href="@{/words(level=${currentLevel}, page=${totalPages})}">末页</a>
+                <a class="page-link" th:href="@{/words(level=${currentLevel}, q=${q}, page=${totalPages})}">末页</a>
             </li>
         </ul>
 
         <form class="d-flex align-items-center gap-2" th:action="@{/words}" method="get">
-            <input type="hidden" name="level" th:value="${currentLevel}">
+            <input type="hidden" name="level" th:if="${currentLevel != null}" th:value="${currentLevel}">
+            <input type="hidden" name="q" th:value="${q}">
             <div class="input-group input-group-sm" style="width: 180px;">
                 <span class="input-group-text">跳到</span>
                 <input type="number" name="page" class="form-control" min="1"

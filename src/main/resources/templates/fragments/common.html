@@ -31,13 +31,25 @@
                 </li>
             </ul>
 
+            <!-- 搜索：在全部级别中搜索，结果显示在单词列表页 -->
+            <form class="nav-search my-2 my-md-0 me-md-3" th:if="${loginUser}"
+                  th:action="@{/words}" method="get" role="search">
+                <div class="input-group input-group-sm">
+                    <input type="search" name="q" class="form-control"
+                           placeholder="搜索单词或中文"
+                           th:value="${q}" maxlength="30"
+                           autocomplete="off" autocapitalize="off" spellcheck="false">
+                    <button type="submit" class="btn btn-primary">搜索</button>
+                </div>
+            </form>
+
             <!-- 右侧：用户信息 -->
             <div class="ms-auto d-flex align-items-center gap-2">
 
                 <!-- 已登录：头像 + 用户名，点击展开个人菜单 -->
                 <div class="dropdown" th:if="${loginUser}">
                     <button type="button" class="nav-user dropdown-toggle"
-                            data-bs-toggle="dropdown" aria-expanded="false">
+                            data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
                         <span class="avatar avatar-sm"
                               th:text="${#strings.toUpperCase(#strings.substring(loginUser.username, 0, 1))}">J</span>
                         <span class="fw-semibold" th:text="${loginUser.username}">[用户名]</span>

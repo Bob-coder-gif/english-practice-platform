@@ -1,16 +1,21 @@
-/* ==================== 主题颜色 ==================== */
+/* ============================================================
+ * 1. 主题变量
+ * ============================================================ */
 :root {
     --app-pink: #fb7299;
     --app-pink-dark: #e85d85;
+    --app-pink-light: #fde2ea;
     --app-blue: #00aeec;
     --app-blue-dark: #0096cc;
     --app-bg: #f1f2f3;
     --app-text: #18191c;
     --app-text-muted: #9499a0;
-    --app-border: #e3e5e7;
     --app-radius: 8px;
 }
 
+/* ============================================================
+ * 2. 基础样式
+ * ============================================================ */
 body {
     background-color: var(--app-bg);
     color: var(--app-text);
@@ -18,7 +23,96 @@ body {
     "Microsoft YaHei", sans-serif;
 }
 
-/* ==================== 导航栏 ==================== */
+a {
+    color: var(--app-blue);
+}
+
+.text-muted-app {
+    color: var(--app-text-muted);
+}
+
+.text-pink {
+    color: var(--app-pink-dark);
+}
+
+/* 保留释义中的换行，每个词性单独一行 */
+.meaning {
+    white-space: pre-line;
+}
+
+.phonetic {
+    color: var(--app-text-muted);
+}
+
+/* 搜索结果中匹配的文字 */
+mark {
+    padding: 0 1px;
+    border-radius: 2px;
+    background-color: var(--app-pink-light);
+    color: var(--app-pink-dark);
+    font-weight: 600;
+}
+
+/* ============================================================
+ * 3. 覆盖 Bootstrap 组件的颜色：改变量，不改源文件
+ * ============================================================ */
+.btn-primary {
+    --bs-btn-bg: var(--app-pink);
+    --bs-btn-border-color: var(--app-pink);
+    --bs-btn-hover-bg: var(--app-pink-dark);
+    --bs-btn-hover-border-color: var(--app-pink-dark);
+    --bs-btn-active-bg: var(--app-pink-dark);
+    --bs-btn-active-border-color: var(--app-pink-dark);
+}
+
+.btn-info {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: var(--app-blue);
+    --bs-btn-border-color: var(--app-blue);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--app-blue-dark);
+    --bs-btn-hover-border-color: var(--app-blue-dark);
+}
+
+.nav-pills {
+    --bs-nav-pills-link-active-bg: var(--app-pink);
+}
+
+.nav-pills .nav-link {
+    color: var(--app-text);
+}
+
+.pagination {
+    --bs-pagination-active-bg: var(--app-pink);
+    --bs-pagination-active-border-color: var(--app-pink);
+    --bs-pagination-color: var(--app-text);
+}
+
+.progress {
+    --bs-progress-bar-bg: var(--app-pink);
+}
+
+.progress-bar.progress-bar-done {
+    background-color: var(--app-pink-dark);
+}
+
+.dropdown-menu {
+    --bs-dropdown-link-active-bg: var(--app-pink);
+}
+
+/* ============================================================
+ * 4. 卡片
+ * ============================================================ */
+.app-card {
+    background-color: #fff;
+    border: none;
+    border-radius: var(--app-radius);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* ============================================================
+ * 5. 导航栏
+ * ============================================================ */
 .app-navbar {
     background-color: #fff;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
@@ -38,67 +132,54 @@ body {
     color: var(--app-pink);
 }
 
-/* ==================== 卡片 ==================== */
-.app-card {
-    background-color: #fff;
+/* 搜索框：手机上占满整行 */
+.nav-search {
+    width: 100%;
+}
+
+/* 头像 + 用户名按钮 */
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px 4px 4px;
     border: none;
-    border-radius: var(--app-radius);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--bs-body-color);
 }
 
-/* ==================== 按钮：覆盖 Bootstrap 的默认颜色 ==================== */
-.btn-primary {
-    --bs-btn-bg: var(--app-pink);
-    --bs-btn-border-color: var(--app-pink);
-    --bs-btn-hover-bg: var(--app-pink-dark);
-    --bs-btn-hover-border-color: var(--app-pink-dark);
-    --bs-btn-active-bg: var(--app-pink-dark);
-    --bs-btn-active-border-color: var(--app-pink-dark);
+.nav-user:hover,
+.nav-user[aria-expanded="true"] {
+    background-color: var(--app-pink-light);
 }
 
-.btn-info {
-    --bs-btn-color: #fff;
-    --bs-btn-bg: var(--app-blue);
-    --bs-btn-border-color: var(--app-blue);
-    --bs-btn-hover-color: #fff;
-    --bs-btn-hover-bg: var(--app-blue-dark);
-    --bs-btn-hover-border-color: var(--app-blue-dark);
+/* ============================================================
+ * 6. 首字母头像
+ * ============================================================ */
+.avatar {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background-color: var(--app-pink);
+    color: #fff;
+    font-size: 28px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* ==================== 通用 ==================== */
-.text-muted-app {
-    color: var(--app-text-muted);
+.avatar.avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: 15px;
 }
 
-/* 保留释义中的换行，每个词性单独一行 */
-.meaning {
-    white-space: pre-line;
-}
-
-.phonetic {
-    color: var(--app-text-muted);
-}
-
-a {
-    color: var(--app-blue);
-}
-
-/* ==================== 胶囊导航、分页：使用主题色 ==================== */
-.nav-pills {
-    --bs-nav-pills-link-active-bg: var(--app-pink);
-}
-
-.nav-pills .nav-link {
-    color: var(--app-text);
-}
-
-.pagination {
-    --bs-pagination-active-bg: var(--app-pink);
-    --bs-pagination-active-border-color: var(--app-pink);
-    --bs-pagination-color: var(--app-text);
-}
-
-/* ==================== 打卡日历 ==================== */
+/* ============================================================
+ * 7. 打卡日历
+ * ============================================================ */
 .calendar {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -136,7 +217,7 @@ a {
     opacity: 0.35;
 }
 
-/* 今天：粉色边框 */
+/* 今天：粉色边框（outline 不占空间，不影响布局） */
 .calendar-day.is-today {
     outline: 2px solid var(--app-pink);
     outline-offset: 1px;
@@ -144,7 +225,7 @@ a {
 
 /* 颜色深浅：从浅灰到 B 站粉 */
 .heat-0 { background-color: #ebedf0; }
-.heat-1 { background-color: #fde2ea; }
+.heat-1 { background-color: var(--app-pink-light); }
 .heat-2 { background-color: #fbb6c9; }
 .heat-3 { background-color: #f98cab; color: #fff; }
 .heat-4 { background-color: var(--app-pink-dark); color: #fff; }
@@ -156,55 +237,24 @@ a {
     border-radius: 3px;
 }
 
-/* 超额完成：深粉色 */
-.text-pink {
-    color: var(--app-pink-dark);
+/* ============================================================
+ * 8. 响应式：放在最后，确保覆盖上面的默认样式
+ * ============================================================ */
+
+/* 电脑（≥ 768px）：搜索框固定宽度 */
+@media (min-width: 768px) {
+    .nav-search {
+        width: 260px;
+    }
 }
 
-.progress-bar.progress-bar-done {
-    background-color: var(--app-pink-dark);
-}
-
-/* 个人主页：首字母头像 */
-.avatar {
-    width: 64px;
-    height: 64px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    background-color: var(--app-pink);
-    color: #fff;
-    font-size: 28px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* 导航栏：头像 + 用户名按钮 */
-.nav-user {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 4px 10px 4px 4px;
-    border: none;
-    border-radius: 999px;
-    background: transparent;
-    color: var(--bs-body-color);
-}
-
-.nav-user:hover,
-.nav-user[aria-expanded="true"] {
-    background-color: #fde2ea;
-}
-
-/* 小号头像：在导航栏里使用 */
-.avatar.avatar-sm {
-    width: 32px;
-    height: 32px;
-    font-size: 15px;
-}
-
-/* 下拉菜单中当前页面的高亮颜色 */
-.dropdown-menu {
-    --bs-dropdown-link-active-bg: var(--app-pink);
+/* 手机（< 768px）：导航栏折叠后，个人菜单直接展开在头像下方，不再浮动 */
+@media (max-width: 767.98px) {
+    .app-navbar .dropdown-menu {
+        position: static;
+        border: none;
+        box-shadow: none;
+        padding-left: 0;
+        margin-top: 4px;
+    }
 }
