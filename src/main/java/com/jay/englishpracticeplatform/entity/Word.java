@@ -39,6 +39,6 @@ public class Word {
     )
     @Enumerated(EnumType.STRING)
     @JdbcTypeCode(SqlTypes.VARCHAR)
-    @Column(name = "level", nullable = false , length = 20)
+    @Column(name = "level", nullable = false, length = 20)
     private Set<WordLevel> levels = new HashSet<>();
 }

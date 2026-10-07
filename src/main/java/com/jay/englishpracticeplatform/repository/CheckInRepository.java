@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.time.LocalDate;
 import java.util.List;
 
-public interface CheckInRepository extends JpaRepository<CheckIn, Long>{
+public interface CheckInRepository extends JpaRepository<CheckIn, Long> {
 
     boolean existsByUserIdAndCheckDate(Long userId, LocalDate checkDate);
 
@@ -18,8 +18,8 @@ public interface CheckInRepository extends JpaRepository<CheckIn, Long>{
     List<LocalDate> findAllDates(Long userId);
 
     @Query("""
-            select c.checkDate from CheckIn c
-            where c.user.id = :userId and c.checkDate >= :start and c.checkDate < :end
-           """)
+             select c.checkDate from CheckIn c
+             where c.user.id = :userId and c.checkDate >= :start and c.checkDate < :end
+            """)
     List<LocalDate> findDatesBetween(Long userId, LocalDate start, LocalDate end);
 }

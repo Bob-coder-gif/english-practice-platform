@@ -6,13 +6,13 @@ public enum DictationSource {
     LEARNED("已学过的单词"),
     MISTAKES("错题本");
 
-    private  final String label;
+    private final String label;
 
-    DictationSource(String label){
+    DictationSource(String label) {
         this.label = label;
     }
 
-    public String getLabel(){
+    public String getLabel() {
         return label;
     }
 }

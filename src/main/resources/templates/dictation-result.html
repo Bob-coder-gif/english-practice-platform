@@ -54,7 +54,8 @@
                     <td>
                         <div class="fw-semibold" th:text="${item.spelling}">[单词]</div>
                         <div class="phonetic small" th:if="${item.phonetic}"
-                             th:text="'/' + ${item.phonetic} + '/'">[音标]</div>
+                             th:text="'/' + ${item.phonetic} + '/'">[音标]
+                        </div>
                     </td>
                     <td class="meaning small" th:text="${item.meaning}">[释义]</td>
                     <td class="meaning small">
@@ -63,7 +64,8 @@
                     </td>
                     <td>
                         <button type="button" class="btn btn-sm btn-outline-secondary"
-                                th:data-speak="${item.spelling}">🔊</button>
+                                th:data-speak="${item.spelling}">🔊
+                        </button>
                     </td>
                     <td class="text-center fs-5" th:text="${item.correct} ? '✓' : '✗'">✓</td>
                 </tr>

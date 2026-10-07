@@ -43,10 +43,12 @@
             <div data-side="en">
                 <div class="display-6 fw-semibold mb-1" th:text="${word.spelling}">[单词]</div>
                 <div class="phonetic mb-2" th:if="${word.phonetic}"
-                     th:text="'/' + ${word.phonetic} + '/'">[音标]</div>
+                     th:text="'/' + ${word.phonetic} + '/'">[音标]
+                </div>
                 <button type="button" class="btn btn-sm btn-outline-secondary"
                         th:data-speak="${word.spelling}"
-                        th:data-autospeak="${word.spelling}">🔊 发音</button>
+                        th:data-autospeak="${word.spelling}">🔊 发音
+                </button>
             </div>
 
             <!-- 中文面：默认隐藏，由 app.js 根据模式决定 -->

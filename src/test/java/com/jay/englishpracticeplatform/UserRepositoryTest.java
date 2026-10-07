@@ -19,7 +19,7 @@ class UserRepositoryTest {
     private UserRepository userRepository;
 
     @Test
-    void saveAndFindByUsername(){
+    void saveAndFindByUsername() {
         // 准备数据
         User user = new User();
         user.setUsername("test_user");
@@ -39,7 +39,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    void existsByUsername(){
+    void existsByUsername() {
         User user = new User();
         user.setUsername("exists_user");
         user.setPasswordHash("fake_hash");

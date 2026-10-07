@@ -1,0 +1,4 @@
+# 复制本文件为 application-local.properties，填写你自己的数据库账号
+# application-local.properties 已被 .gitignore 忽略，不会被提交
+spring.datasource.username=root
+spring.datasource.password=你的密码

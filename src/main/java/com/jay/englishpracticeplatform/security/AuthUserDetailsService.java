@@ -14,7 +14,7 @@ public class AuthUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
-    public AuthUserDetailsService(UserRepository userRepository){
+    public AuthUserDetailsService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 

@@ -1,17 +1,14 @@
 package com.jay.englishpracticeplatform.service;
 
 import com.jay.englishpracticeplatform.dto.ProfileView;
-import com.jay.englishpracticeplatform.entity.CheckIn;
 import com.jay.englishpracticeplatform.entity.User;
 import com.jay.englishpracticeplatform.repository.AnswerRecordRepository;
 import com.jay.englishpracticeplatform.repository.CheckInRepository;
 import com.jay.englishpracticeplatform.repository.UserRepository;
 import com.jay.englishpracticeplatform.repository.UserWordRepository;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.nio.file.attribute.UserPrincipal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -27,7 +24,7 @@ public class ProfileService {
     public ProfileService(UserRepository userRepository,
                           UserWordRepository userWordRepository,
                           AnswerRecordRepository answerRecordRepository,
-                          CheckInRepository checkInRepository){
+                          CheckInRepository checkInRepository) {
         this.userRepository = userRepository;
         this.userWordRepository = userWordRepository;
         this.answerRecordRepository = answerRecordRepository;
@@ -35,7 +32,7 @@ public class ProfileService {
     }
 
     @Transactional(readOnly = true)
-    public ProfileView getProfile(Long userId){
+    public ProfileView getProfile(Long userId) {
         User user = userRepository.findById(userId).orElseThrow();
         LocalDate today = LocalDate.now();
         LocalDate registeredOn = user.getCreatedAt().toLocalDate();
@@ -52,11 +49,11 @@ public class ProfileService {
                 registeredOn,
                 ChronoUnit.DAYS.between(registeredOn, today) + 1,
                 userWordRepository.countByUserId(userId),
-                userWordRepository.countMistakes(userId,StudyService.MASTERED_STREAK),
+                userWordRepository.countMistakes(userId, StudyService.MASTERED_STREAK),
                 summary.getTotal(),
                 correctAnswers,
                 checkDates.size(),
-                CheckInService.calculateStreak(checkDates,today),
+                CheckInService.calculateStreak(checkDates, today),
                 CheckInService.calculateLongestStreak(checkDates),
                 user.getDailyGoal()
         );

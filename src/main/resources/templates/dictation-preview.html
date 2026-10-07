@@ -6,51 +6,53 @@
 
 <main class="container" style="max-width: 820px;">
 
-  <div class="app-card p-3 mb-3">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-      <div>
-        <span class="fw-semibold" th:text="${modeLabel} + ' · 预习'">听写英语 · 预习</span>
-        <span class="text-muted-app small">
+    <div class="app-card p-3 mb-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <span class="fw-semibold" th:text="${modeLabel} + ' · 预习'">听写英语 · 预习</span>
+                <span class="text-muted-app small">
                     · <span th:text="${level.label}">[级别]</span>
                     · <span th:text="${source.label}">[来源]</span>
                     · <span th:text="${#lists.size(words)}">20</span> 个单词
                 </span>
-      </div>
-      <a class="btn btn-primary"
-         th:href="@{/dictation/{mode}/test(mode=${modePath}, level=${level}, ids=${ids})}">开始听写</a>
+            </div>
+            <a class="btn btn-primary"
+               th:href="@{/dictation/{mode}/test(mode=${modePath}, level=${level}, ids=${ids})}">开始听写</a>
+        </div>
+        <div class="text-muted-app small mt-2">先把这组单词过一遍，准备好后开始听写。听写时题目顺序会打乱。</div>
     </div>
-    <div class="text-muted-app small mt-2">先把这组单词过一遍，准备好后开始听写。听写时题目顺序会打乱。</div>
-  </div>
 
-  <div class="app-card p-3 mb-3">
-    <div class="table-responsive">
-      <table class="table align-middle mb-0">
-        <tbody>
-        <tr th:each="w, stat : ${words}">
-          <td class="text-muted-app" style="width: 40px;" th:text="${stat.count}">1</td>
-          <td style="min-width: 140px;">
-            <div class="fw-semibold" th:text="${w.spelling}">[单词]</div>
-            <div class="phonetic small" th:if="${w.phonetic}"
-                 th:text="'/' + ${w.phonetic} + '/'">[音标]</div>
-          </td>
-          <td class="meaning small" th:text="${w.meaning}">[释义]</td>
-          <td style="width: 50px;">
-            <button type="button" class="btn btn-sm btn-outline-secondary"
-                    th:data-speak="${w.spelling}">🔊</button>
-          </td>
-        </tr>
-        </tbody>
-      </table>
+    <div class="app-card p-3 mb-3">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <tbody>
+                <tr th:each="w, stat : ${words}">
+                    <td class="text-muted-app" style="width: 40px;" th:text="${stat.count}">1</td>
+                    <td style="min-width: 140px;">
+                        <div class="fw-semibold" th:text="${w.spelling}">[单词]</div>
+                        <div class="phonetic small" th:if="${w.phonetic}"
+                             th:text="'/' + ${w.phonetic} + '/'">[音标]
+                        </div>
+                    </td>
+                    <td class="meaning small" th:text="${w.meaning}">[释义]</td>
+                    <td style="width: 50px;">
+                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                th:data-speak="${w.spelling}">🔊
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-  </div>
 
-  <div class="d-flex flex-wrap gap-2 mb-4">
-    <a class="btn btn-primary"
-       th:href="@{/dictation/{mode}/test(mode=${modePath}, level=${level}, ids=${ids})}">开始听写</a>
-    <a class="btn btn-outline-secondary"
-       th:href="@{/dictation/{mode}(mode=${modePath}, level=${level}, source=${source}, count=${count})}">换一组</a>
-    <a class="btn btn-outline-secondary" th:href="@{/dictation}">返回设置</a>
-  </div>
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a class="btn btn-primary"
+           th:href="@{/dictation/{mode}/test(mode=${modePath}, level=${level}, ids=${ids})}">开始听写</a>
+        <a class="btn btn-outline-secondary"
+           th:href="@{/dictation/{mode}(mode=${modePath}, level=${level}, source=${source}, count=${count})}">换一组</a>
+        <a class="btn btn-outline-secondary" th:href="@{/dictation}">返回设置</a>
+    </div>
 
 </main>
 

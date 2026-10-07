@@ -1,11 +1,6 @@
 package com.jay.englishpracticeplatform;
 
-import com.jay.englishpracticeplatform.entity.AnswerMode;
-import com.jay.englishpracticeplatform.entity.AnswerRecord;
-import com.jay.englishpracticeplatform.entity.User;
-import com.jay.englishpracticeplatform.entity.UserWord;
-import com.jay.englishpracticeplatform.entity.Word;
-import com.jay.englishpracticeplatform.entity.WordLevel;
+import com.jay.englishpracticeplatform.entity.*;
 import com.jay.englishpracticeplatform.repository.AnswerRecordRepository;
 import com.jay.englishpracticeplatform.repository.UserWordRepository;
 import com.jay.englishpracticeplatform.service.StudyService;

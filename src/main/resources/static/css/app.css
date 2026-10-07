@@ -224,11 +224,27 @@ mark {
 }
 
 /* 颜色深浅：从浅灰到 B 站粉 */
-.heat-0 { background-color: #ebedf0; }
-.heat-1 { background-color: var(--app-pink-light); }
-.heat-2 { background-color: #fbb6c9; }
-.heat-3 { background-color: #f98cab; color: #fff; }
-.heat-4 { background-color: var(--app-pink-dark); color: #fff; }
+.heat-0 {
+    background-color: #ebedf0;
+}
+
+.heat-1 {
+    background-color: var(--app-pink-light);
+}
+
+.heat-2 {
+    background-color: #fbb6c9;
+}
+
+.heat-3 {
+    background-color: #f98cab;
+    color: #fff;
+}
+
+.heat-4 {
+    background-color: var(--app-pink-dark);
+    color: #fff;
+}
 
 .legend-box {
     display: inline-block;

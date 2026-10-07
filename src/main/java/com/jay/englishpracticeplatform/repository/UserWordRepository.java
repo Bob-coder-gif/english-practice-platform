@@ -3,26 +3,25 @@ package com.jay.englishpracticeplatform.repository;
 import com.jay.englishpracticeplatform.entity.User;
 import com.jay.englishpracticeplatform.entity.UserWord;
 import com.jay.englishpracticeplatform.entity.WordLevel;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
-import java.util.Optional;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
-public interface UserWordRepository extends JpaRepository< UserWord, Long> {
+public interface UserWordRepository extends JpaRepository<UserWord, Long> {
 
     Optional<UserWord> findByUserIdAndWordId(Long userId, Long wordId);
 
     @Query("""
-            select count(uw) from UserWord uw
-            join uw.word w
-            join w.levels l
-            where uw.user.id = :userId and l = :level        
-           """)
+             select count(uw) from UserWord uw
+             join uw.word w
+             join w.levels l
+             where uw.user.id = :userId and l = :level        
+            """)
     long countLearnedByLevel(Long userId, WordLevel level);
 
     //复习， 已到期的单词，按到期时间从早到晚
@@ -62,12 +61,12 @@ public interface UserWordRepository extends JpaRepository< UserWord, Long> {
 
     //错题泵中国的单词数量
     @Query("""
-           select count(uw) from UserWord uw
-           where uw.user.id = :userId
-                and uw.unknownCount > 0 
-                and uw.streak < :masteredStreak
-           
-           """)
+            select count(uw) from UserWord uw
+            where uw.user.id = :userId
+                 and uw.unknownCount > 0 
+                 and uw.streak < :masteredStreak
+            
+            """)
     long countMistakes(Long userId, int masteredStreak);
 
     //错题本中随机选出若干个单词的 id

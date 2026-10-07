@@ -20,58 +20,58 @@ public class WordService {
 
     private final WordRepository wordRepository;
 
-    public WordService(WordRepository wordRepository){
+    public WordService(WordRepository wordRepository) {
         this.wordRepository = wordRepository;
     }
 
     //单词列表
     // level 为 null，全部级别，keyword为空，不搜索，按字母列出全部
     @Transactional(readOnly = true)
-    public Page<Word> listWords(WordLevel level, String keyword, int page){
-        int safePage = Math.max(page,0);
+    public Page<Word> listWords(WordLevel level, String keyword, int page) {
+        int safePage = Math.max(page, 0);
         String cleaned = normalizeKeyword(keyword);
 
         //不搜索，按字母排序
-        if(cleaned.isEmpty()){
+        if (cleaned.isEmpty()) {
             PageRequest sorted = PageRequest.of(safePage, PAGE_SIZE, Sort.by("spelling"));
             return level == null
                     ? wordRepository.findAll(sorted)
-                    : wordRepository.findByLevel(level,sorted);
+                    : wordRepository.findByLevel(level, sorted);
         }
 
-        PageRequest unsorted = PageRequest.of(safePage,PAGE_SIZE);
+        PageRequest unsorted = PageRequest.of(safePage, PAGE_SIZE);
         String escaped = escapeLike(cleaned);
-        String prefix = escaped +"%";
+        String prefix = escaped + "%";
         String contains = "%" + escaped + "%";
         return level == null
-                ? wordRepository.search(prefix,contains,unsorted)
+                ? wordRepository.search(prefix, contains, unsorted)
                 : wordRepository.searchByLevel(level, prefix, contains, unsorted);
     }
 
     @Transactional(readOnly = true)
-    public long countAll(){
+    public long countAll() {
         return wordRepository.count();
     }
 
     @Transactional(readOnly = true)
-    public long countByLevel(WordLevel level){
+    public long countByLevel(WordLevel level) {
         return wordRepository.countByLevel(level);
     }
 
     //去掉首尾空格，并限制长度
-    public static String normalizeKeyword(String keyword){
-        if(keyword == null){
+    public static String normalizeKeyword(String keyword) {
+        if (keyword == null) {
             return "";
         }
         String trimmed = keyword.strip();
-        return trimmed.length() > MAX_KEYWORD_LENGTH ? trimmed.substring(0,MAX_KEYWORD_LENGTH) : trimmed;
+        return trimmed.length() > MAX_KEYWORD_LENGTH ? trimmed.substring(0, MAX_KEYWORD_LENGTH) : trimmed;
     }
 
     //转移 LIKE 中的特殊字符
-    static  String escapeLike(String text){
+    static String escapeLike(String text) {
         return text
-                .replace("\\","\\\\")
-                .replace("%","\\%")
-                .replace("_","\\_");
+                .replace("\\", "\\\\")
+                .replace("%", "\\%")
+                .replace("_", "\\_");
     }
 }

@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 public class UserWord {
 
     // 连续认识 1，2，3，4，5，6，次后，分别间隔多少天再复习
-    private static final int[] REVIEW_INTERVAL_DAYS = {1,2,4,7,15,30};
+    private static final int[] REVIEW_INTERVAL_DAYS = {1, 2, 4, 7, 15, 30};
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,18 +56,18 @@ public class UserWord {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    public UserWord(User user, Word word){
+    public UserWord(User user, Word word) {
         this.user = user;
         this.word = word;
     }
 
     @PrePersist
-    protected void onCreate(){
+    protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
 
     //用户点了 [认识]
-    public void markKnown(LocalDateTime now){
+    public void markKnown(LocalDateTime now) {
         knownCount++;
         streak++;
         int index = Math.min(streak - 1, REVIEW_INTERVAL_DAYS.length - 1);
@@ -76,7 +76,7 @@ public class UserWord {
     }
 
     //用户点了 [不认识]
-    public void markUnknown(LocalDateTime now){
+    public void markUnknown(LocalDateTime now) {
         unknownCount++;
         streak = 0;
         lastReviewedAt = now;

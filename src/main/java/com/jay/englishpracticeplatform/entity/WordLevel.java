@@ -10,11 +10,11 @@ public enum WordLevel {
 
     private final String label;
 
-    WordLevel(String label){
+    WordLevel(String label) {
         this.label = label;
     }
 
-    public String getLabel(){
+    public String getLabel() {
         return label;
     }
 }

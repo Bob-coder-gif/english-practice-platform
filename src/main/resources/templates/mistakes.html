@@ -34,7 +34,8 @@
                     <td>
                         <div class="fw-semibold" th:text="${uw.word.spelling}">[单词]</div>
                         <div class="phonetic small" th:if="${uw.word.phonetic}"
-                             th:text="'/' + ${uw.word.phonetic} + '/'">[音标]</div>
+                             th:text="'/' + ${uw.word.phonetic} + '/'">[音标]
+                        </div>
                     </td>
                     <td class="meaning" th:text="${uw.word.meaning}">[释义]</td>
                     <td class="text-center">
@@ -44,10 +45,12 @@
                         <span th:text="${uw.streak}">0</span> / <span th:text="${masteredStreak}">3</span>
                     </td>
                     <td class="text-muted-app small"
-                        th:text="${#temporals.format(uw.nextReviewAt, 'MM-dd HH:mm')}">[时间]</td>
+                        th:text="${#temporals.format(uw.nextReviewAt, 'MM-dd HH:mm')}">[时间]
+                    </td>
                     <td>
                         <button type="button" class="btn btn-sm btn-outline-secondary"
-                                th:data-speak="${uw.word.spelling}">🔊</button>
+                                th:data-speak="${uw.word.spelling}">🔊
+                        </button>
                     </td>
                 </tr>
                 </tbody>

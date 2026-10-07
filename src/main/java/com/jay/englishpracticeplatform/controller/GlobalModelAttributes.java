@@ -16,11 +16,11 @@ public class GlobalModelAttributes {
     @ModelAttribute
     public void addCommonAttributes(HttpServletRequest request,
                                     @AuthenticationPrincipal AuthUser loginUser,
-                                    Model model){
+                                    Model model) {
 
         model.addAttribute("currentPath", request.getRequestURI());
-        if(loginUser != null){
-            model.addAttribute("loginUser",loginUser);
+        if (loginUser != null) {
+            model.addAttribute("loginUser", loginUser);
         }
     }
 }

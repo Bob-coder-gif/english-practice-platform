@@ -1,16 +1,10 @@
 package com.jay.englishpracticeplatform.service;
 
-import com.jay.englishpracticeplatform.entity.UserWord;
-import com.jay.englishpracticeplatform.entity.Word;
-import com.jay.englishpracticeplatform.entity.WordLevel;
+import com.jay.englishpracticeplatform.entity.*;
 import com.jay.englishpracticeplatform.repository.AnswerRecordRepository;
 import com.jay.englishpracticeplatform.repository.UserRepository;
 import com.jay.englishpracticeplatform.repository.UserWordRepository;
 import com.jay.englishpracticeplatform.repository.WordRepository;
-import com.jay.englishpracticeplatform.entity.AnswerMode;
-import com.jay.englishpracticeplatform.entity.AnswerRecord;
-import com.jay.englishpracticeplatform.entity.User;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -46,6 +40,7 @@ public class StudyService {
         this.answerRecordRepository = answerRecordRepository;
         this.checkInService = checkInService;
     }
+
     // 找出该用户在这个级别中，下一个还没学过的单词
     @Transactional(readOnly = true)
     public Optional<Word> nextNewWord(Long userId, WordLevel level) {
@@ -70,13 +65,12 @@ public class StudyService {
         LocalDateTime now = LocalDateTime.now();
 
         // 更新单词的学习状态
-        UserWord userWord = userWordRepository.findByUserIdAndWordId(userId,wordId)
-                .orElseGet( () -> new UserWord(userRef, word));
+        UserWord userWord = userWordRepository.findByUserIdAndWordId(userId, wordId)
+                .orElseGet(() -> new UserWord(userRef, word));
 
-        if( known){
+        if (known) {
             userWord.markKnown(now);
-        }
-        else {
+        } else {
             userWord.markUnknown(now);
         }
         userWordRepository.save(userWord);

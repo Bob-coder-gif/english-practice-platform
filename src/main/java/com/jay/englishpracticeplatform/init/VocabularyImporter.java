@@ -29,33 +29,34 @@ public class VocabularyImporter implements ApplicationRunner {
     private final WordRepository wordRepository;
     private final JsonMapper jsonMapper;
 
-    public VocabularyImporter(WordRepository wordRepository, JsonMapper jsonMapper){
+    public VocabularyImporter(WordRepository wordRepository, JsonMapper jsonMapper) {
         this.wordRepository = wordRepository;
         this.jsonMapper = jsonMapper;
     }
 
     @Override
-    public void run(ApplicationArguments args) throws  IOException{
+    public void run(ApplicationArguments args) throws IOException {
         //幂等，已经导入过就跳过，保证无论启动多少次，结果都一样
-        if(wordRepository.count() > 0){
-            log.info("词库已存在({}个单词，跳过导入",wordRepository.count());
+        if (wordRepository.count() > 0) {
+            log.info("词库已存在({}个单词，跳过导入", wordRepository.count());
             return;
         }
 
         long start = System.currentTimeMillis();
 
         List<RawWord> rawWords;
-        try(InputStream in = new ClassPathResource(WORDS_FILE).getInputStream()){
-            rawWords = jsonMapper.readValue(in, new TypeReference<List<RawWord>>(){});
+        try (InputStream in = new ClassPathResource(WORDS_FILE).getInputStream()) {
+            rawWords = jsonMapper.readValue(in, new TypeReference<List<RawWord>>() {
+            });
 
         }
 
         List<Word> words = toWords(rawWords);
         wordRepository.saveAll(words);
 
-        log.info("词库导入完成，{} 个单词，耗时 {} ms",words.size(), System.currentTimeMillis() - start);
-        for(WordLevel level : WordLevel.values()){
-            log.info(" {} ({}) ,{} 个",level,level.getLabel(),wordRepository.countByLevel(level));
+        log.info("词库导入完成，{} 个单词，耗时 {} ms", words.size(), System.currentTimeMillis() - start);
+        for (WordLevel level : WordLevel.values()) {
+            log.info(" {} ({}) ,{} 个", level, level.getLabel(), wordRepository.countByLevel(level));
         }
 
     }
@@ -90,14 +91,14 @@ public class VocabularyImporter implements ApplicationRunner {
             word.setPhonetic(raw.phonetic() == null ? null : raw.phonetic().strip());
             word.setMeaning(meaning);
             word.getLevels().addAll(raw.levels);
-            unique.put(key,word);
+            unique.put(key, word);
         }
 
         return new ArrayList<>(unique.values());
     }
 
     @JsonIgnoreProperties
-    record RawWord(String word,String phonetic, String translation, List<WordLevel> levels){
+    record RawWord(String word, String phonetic, String translation, List<WordLevel> levels) {
 
     }
 }

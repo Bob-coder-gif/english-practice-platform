@@ -34,7 +34,7 @@ public class CheckIn {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createAt;
 
-    public CheckIn(User user, LocalDate checkDate, LocalDateTime createAt){
+    public CheckIn(User user, LocalDate checkDate, LocalDateTime createAt) {
         this.user = user;
         this.checkDate = checkDate;
         this.createAt = createAt;

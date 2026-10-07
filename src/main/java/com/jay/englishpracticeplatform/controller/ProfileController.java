@@ -13,14 +13,14 @@ public class ProfileController {
 
     private final ProfileService profileService;
 
-    public ProfileController(ProfileService profileService){
+    public ProfileController(ProfileService profileService) {
         this.profileService = profileService;
     }
 
     @GetMapping("/profile")
     public String profile(@AuthenticationPrincipal AuthUser loginUser,
-                          Model model){
-        model.addAttribute("profile" , profileService.getProfile(loginUser.getId()));
+                          Model model) {
+        model.addAttribute("profile", profileService.getProfile(loginUser.getId()));
         return "profile";
     }
 }

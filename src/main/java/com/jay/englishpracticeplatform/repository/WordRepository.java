@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface WordRepository extends JpaRepository<Word, Long>{
+public interface WordRepository extends JpaRepository<Word, Long> {
 
     @Query("select count(w) from Word w join w.levels l where l = :level")
     long countByLevel(WordLevel level);
@@ -69,13 +69,13 @@ public interface WordRepository extends JpaRepository<Word, Long>{
                             else 2
                         end ,
                         w.spelling
-                            
+                    
                     """,
             countQuery = """
-                        select count (w) from Word w
-                        where w.spelling like :contains escape '\\'
-                            or w.spelling like :contains escape  '\\'
-                        """
+                    select count (w) from Word w
+                    where w.spelling like :contains escape '\\'
+                        or w.spelling like :contains escape  '\\'
+                    """
     )
     Page<Word> search(String prefix, String contains, Pageable pageable);
 
@@ -95,11 +95,11 @@ public interface WordRepository extends JpaRepository<Word, Long>{
                         w.spelling
                     """,
             countQuery = """
-                        select count (w) from Word w join  w.levels l
-                        where l = :level
-                            and (w.spelling like :contains escape '\\'
-                                or w.meaning like :contains escape  '\\')
-                        """
+                    select count (w) from Word w join  w.levels l
+                    where l = :level
+                        and (w.spelling like :contains escape '\\'
+                            or w.meaning like :contains escape  '\\')
+                    """
     )
-    Page<Word> searchByLevel(WordLevel level,String prefix,String contains, Pageable pageable);
+    Page<Word> searchByLevel(WordLevel level, String prefix, String contains, Pageable pageable);
 }

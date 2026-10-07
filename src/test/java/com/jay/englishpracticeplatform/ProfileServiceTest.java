@@ -16,16 +16,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @Transactional
 class ProfileServiceTest {
 
-    @Autowired private ProfileService profileService;
-    @Autowired private StudyService studyService;
-    @Autowired private CheckInService checkInService;
-    @Autowired private UserService userService;
+    @Autowired
+    private ProfileService profileService;
+    @Autowired
+    private StudyService studyService;
+    @Autowired
+    private CheckInService checkInService;
+    @Autowired
+    private UserService userService;
 
     @Test
     void newUserProfileIsEmpty() {

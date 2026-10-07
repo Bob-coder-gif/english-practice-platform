@@ -1,19 +1,16 @@
 package com.jay.englishpracticeplatform.config;
 
 import com.jay.englishpracticeplatform.security.AuthUserDetailsService;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
-import javax.sql.DataSource;
-
 @Configuration
 public class SecurityConfig {
 
-    private static final int REMEBER_NE_SECONDS = 14 * 24 * 60 *60;
+    private static final int REMEBER_NE_SECONDS = 14 * 24 * 60 * 60;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,

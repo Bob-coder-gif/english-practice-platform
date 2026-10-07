@@ -16,7 +16,8 @@
             <select id="level" name="level" class="form-select">
                 <option th:each="lv : ${levels}"
                         th:value="${lv}" th:text="${lv.label}"
-                        th:selected="${lv.name() == 'CET4'}">[级别]</option>
+                        th:selected="${lv.name() == 'CET4'}">[级别]
+                </option>
             </select>
         </div>
 
@@ -26,7 +27,8 @@
                 <th:block th:each="s : ${sources}">
                     <input type="radio" class="btn-check" name="source"
                            th:id="'source-' + ${s}" th:value="${s}" th:checked="${s.name() == 'ALL'}">
-                    <label class="btn btn-outline-secondary" th:for="'source-' + ${s}" th:text="${s.label}">[来源]</label>
+                    <label class="btn btn-outline-secondary" th:for="'source-' + ${s}"
+                           th:text="${s.label}">[来源]</label>
                 </th:block>
             </div>
             <div class="form-text">选择「错题本」时，会从全部级别的错题中出题</div>
@@ -38,7 +40,8 @@
                 <th:block th:each="c : ${counts}">
                     <input type="radio" class="btn-check" name="count"
                            th:id="'count-' + ${c}" th:value="${c}" th:checked="${c == 20}">
-                    <label class="btn btn-outline-secondary" th:for="'count-' + ${c}" th:text="${c} + ' 个'">[数量]</label>
+                    <label class="btn btn-outline-secondary" th:for="'count-' + ${c}"
+                           th:text="${c} + ' 个'">[数量]</label>
                 </th:block>
             </div>
         </div>

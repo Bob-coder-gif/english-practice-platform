@@ -1,7 +1,13 @@
 package com.jay.englishpracticeplatform;
 
-import com.jay.englishpracticeplatform.dto.*;
-import com.jay.englishpracticeplatform.entity.*;
+import com.jay.englishpracticeplatform.dto.DictationQuestion;
+import com.jay.englishpracticeplatform.dto.DictationResult;
+import com.jay.englishpracticeplatform.dto.DictationSource;
+import com.jay.englishpracticeplatform.dto.DictationSubmission;
+import com.jay.englishpracticeplatform.entity.AnswerMode;
+import com.jay.englishpracticeplatform.entity.AnswerRecord;
+import com.jay.englishpracticeplatform.entity.User;
+import com.jay.englishpracticeplatform.entity.WordLevel;
 import com.jay.englishpracticeplatform.repository.AnswerRecordRepository;
 import com.jay.englishpracticeplatform.service.DictationService;
 import com.jay.englishpracticeplatform.service.StudyService;
@@ -21,10 +27,14 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional
 class DictationServiceTest {
 
-    @Autowired private DictationService dictationService;
-    @Autowired private StudyService studyService;
-    @Autowired private UserService userService;
-    @Autowired private AnswerRecordRepository answerRecordRepository;
+    @Autowired
+    private DictationService dictationService;
+    @Autowired
+    private StudyService studyService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private AnswerRecordRepository answerRecordRepository;
 
     private List<Long> idsOf(List<DictationQuestion> questions) {
         return questions.stream().map(DictationQuestion::wordId).toList();

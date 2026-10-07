@@ -63,7 +63,8 @@
                     <td class="meaning" data-highlight-text th:text="${w.meaning}">[释义]</td>
                     <td>
                         <button type="button" class="btn btn-sm btn-outline-secondary"
-                                th:data-speak="${w.spelling}">🔊</button>
+                                th:data-speak="${w.spelling}">🔊
+                        </button>
                     </td>
                 </tr>
                 </tbody>
@@ -83,7 +84,8 @@
                 <a class="page-link" th:href="@{/words(level=${currentLevel}, q=${q}, page=1)}">首页</a>
             </li>
             <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
-                <a class="page-link" th:href="@{/words(level=${currentLevel}, q=${q}, page=${currentPage - 1})}">上一页</a>
+                <a class="page-link"
+                   th:href="@{/words(level=${currentLevel}, q=${q}, page=${currentPage - 1})}">上一页</a>
             </li>
             <li class="page-item active">
                 <span class="page-link">
@@ -91,7 +93,8 @@
                 </span>
             </li>
             <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
-                <a class="page-link" th:href="@{/words(level=${currentLevel}, q=${q}, page=${currentPage + 1})}">下一页</a>
+                <a class="page-link"
+                   th:href="@{/words(level=${currentLevel}, q=${q}, page=${currentPage + 1})}">下一页</a>
             </li>
             <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
                 <a class="page-link" th:href="@{/words(level=${currentLevel}, q=${q}, page=${totalPages})}">末页</a>

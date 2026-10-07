@@ -1,9 +1,8 @@
 package com.jay.englishpracticeplatform;
 
-import com.jay.englishpracticeplatform.exception.UsernameAlreadyExistsException;
 import com.jay.englishpracticeplatform.entity.User;
+import com.jay.englishpracticeplatform.exception.UsernameAlreadyExistsException;
 import com.jay.englishpracticeplatform.service.UserService;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,19 +22,19 @@ class UserServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Test
-    void registerSuccess(){
-        User user = userService.register("alice","123456");
+    void registerSuccess() {
+        User user = userService.register("alice", "123456");
 
         assertNotNull(user.getId());
-        assertEquals("alice",user.getUsername());
+        assertEquals("alice", user.getUsername());
         // 数据库里不是明文密码
-        assertNotEquals("123456",user.getPasswordHash());
+        assertNotEquals("123456", user.getPasswordHash());
         // 使用原密码能够校验通过
         assertTrue(passwordEncoder.matches("123456", user.getPasswordHash()));
     }
 
     @Test
-    void registerDuplicateUsernameThrows(){
+    void registerDuplicateUsernameThrows() {
         userService.register("bob", "123456");
 
         assertThrows(UsernameAlreadyExistsException.class,

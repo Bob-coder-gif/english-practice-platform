@@ -25,7 +25,8 @@
                 <span class="fs-5 fw-semibold" th:text="${q.spelling}">[单词]</span>
                 <span class="phonetic small" th:if="${q.phonetic}" th:text="'/' + ${q.phonetic} + '/'">[音标]</span>
                 <button type="button" class="btn btn-sm btn-outline-secondary ms-auto"
-                        th:data-speak="${q.spelling}">🔊</button>
+                        th:data-speak="${q.spelling}">🔊
+                </button>
             </div>
 
             <div class="list-group">

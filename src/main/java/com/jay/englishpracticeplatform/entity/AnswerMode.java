@@ -8,11 +8,11 @@ public enum AnswerMode {
 
     private final String label;
 
-    AnswerMode(String label){
+    AnswerMode(String label) {
         this.label = label;
     }
 
-    public String getLabel(){
+    public String getLabel() {
         return label;
     }
 }

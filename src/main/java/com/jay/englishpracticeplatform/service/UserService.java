@@ -15,15 +15,15 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     //构造器注入：Spring 创建 UserService 时，自动把这两个依赖传进来
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder){
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
-    public User register(String username, String rawPassword){
+    public User register(String username, String rawPassword) {
         // 检查用户名是否已被占用
-        if(userRepository.existsByUsername(username)){
+        if (userRepository.existsByUsername(username)) {
             throw new UsernameAlreadyExistsException(username);
         }
 
@@ -34,8 +34,7 @@ public class UserService {
 
         try {
             return userRepository.saveAndFlush(user);
-        }
-        catch (DataIntegrityViolationException e){
+        } catch (DataIntegrityViolationException e) {
             // 兜底，两个请求同时注册一个用户名时
             throw new UsernameAlreadyExistsException(username);
         }
