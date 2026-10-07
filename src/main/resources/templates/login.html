@@ -8,6 +8,7 @@
     <div class="app-card p-4 mx-auto" style="max-width: 420px;">
         <h1 class="h4 mb-4 text-center">登录</h1>
 
+
         <div class="alert alert-success" th:if="${message}" th:text="${message}">[提示信息]</div>
         <div class="alert alert-danger" th:if="${param.error}">用户名或密码错误</div>
 
@@ -20,6 +21,11 @@
             <div class="mb-4">
                 <label for="password" class="form-label">密码</label>
                 <input type="password" id="password" name="password" class="form-control" required>
+            </div>
+
+            <div class="form-check mb-4">
+                <input class="form-check-input" type="checkbox" id="remember-me" name="remember-me">
+                <label class="form-check-label" for="remember-me">记住我（14 天内免登录）</label>
             </div>
 
             <button type="submit" class="btn btn-primary w-100">登录</button>
