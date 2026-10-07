@@ -33,14 +33,38 @@
 
             <!-- 右侧：用户信息 -->
             <div class="ms-auto d-flex align-items-center gap-2">
-                <th:block th:if="${loginUser}">
-                    <a class="text-muted-app text-decoration-none"
-                       th:href="@{/profile}"
-                       th:classappend="${currentPath == '/profile'} ? 'text-pink fw-semibold'"
-                       th:text="${loginUser.username}">[用户名]</a>                    <form th:action="@{/logout}" method="post" class="m-0">
-                        <button type="submit" class="btn btn-sm btn-outline-secondary">退出</button>
-                    </form>
-                </th:block>
+
+                <!-- 已登录：头像 + 用户名，点击展开个人菜单 -->
+                <div class="dropdown" th:if="${loginUser}">
+                    <button type="button" class="nav-user dropdown-toggle"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="avatar avatar-sm"
+                              th:text="${#strings.toUpperCase(#strings.substring(loginUser.username, 0, 1))}">J</span>
+                        <span class="fw-semibold" th:text="${loginUser.username}">[用户名]</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" th:href="@{/profile}"
+                               th:classappend="${currentPath == '/profile'} ? 'active'">个人主页</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" th:href="@{/stats}"
+                               th:classappend="${currentPath == '/stats'} ? 'active'">学习统计</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" th:href="@{/checkin}"
+                               th:classappend="${currentPath == '/checkin'} ? 'active'">打卡日历</a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form th:action="@{/logout}" method="post" class="m-0">
+                                <button type="submit" class="dropdown-item">退出登录</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 未登录 -->
                 <th:block th:unless="${loginUser}">
                     <a class="btn btn-sm btn-outline-secondary" th:href="@{/login}">登录</a>
                     <a class="btn btn-sm btn-primary" th:href="@{/register}">注册</a>

@@ -179,3 +179,32 @@ a {
     align-items: center;
     justify-content: center;
 }
+
+/* 导航栏：头像 + 用户名按钮 */
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px 4px 4px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--bs-body-color);
+}
+
+.nav-user:hover,
+.nav-user[aria-expanded="true"] {
+    background-color: #fde2ea;
+}
+
+/* 小号头像：在导航栏里使用 */
+.avatar.avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: 15px;
+}
+
+/* 下拉菜单中当前页面的高亮颜色 */
+.dropdown-menu {
+    --bs-dropdown-link-active-bg: var(--app-pink);
+}
