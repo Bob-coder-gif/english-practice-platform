@@ -164,3 +164,18 @@ a {
 .progress-bar.progress-bar-done {
     background-color: var(--app-pink-dark);
 }
+
+/* 个人主页：首字母头像 */
+.avatar {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background-color: var(--app-pink);
+    color: #fff;
+    font-size: 28px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

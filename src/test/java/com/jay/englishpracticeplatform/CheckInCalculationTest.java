@@ -12,6 +12,8 @@ class CheckInCalculationTest {
 
     private final LocalDate today = LocalDate.of(2026, 10, 5);
 
+    // ==================== 当前连续天数 ====================
+
     @Test
     void noCheckInMeansZeroStreak() {
         assertEquals(0, CheckInService.calculateStreak(List.of(), today));
@@ -25,14 +27,12 @@ class CheckInCalculationTest {
 
     @Test
     void streakStartsFromYesterdayWhenTodayNotCheckedIn() {
-        // 今天还没完成，但昨天和前天打卡了：连续天数不应该断
         var dates = List.of(today.minusDays(1), today.minusDays(2));
         assertEquals(2, CheckInService.calculateStreak(dates, today));
     }
 
     @Test
     void streakStopsAtGap() {
-        // 10-05、10-04 连续，10-03 断开，10-02 不算
         var dates = List.of(today, today.minusDays(1), today.minusDays(3));
         assertEquals(2, CheckInService.calculateStreak(dates, today));
     }
@@ -42,6 +42,40 @@ class CheckInCalculationTest {
         var dates = List.of(today.minusDays(2), today.minusDays(3));
         assertEquals(0, CheckInService.calculateStreak(dates, today));
     }
+
+    // ==================== 最长连续天数 ====================
+
+    @Test
+    void longestStreakOfEmptyIsZero() {
+        assertEquals(0, CheckInService.calculateLongestStreak(List.of()));
+    }
+
+    @Test
+    void longestStreakFindsTheLongestRun() {
+        // 10-01～10-03 连续 3 天，10-05～10-06 连续 2 天
+        var dates = List.of(
+                LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 2), LocalDate.of(2026, 10, 3),
+                LocalDate.of(2026, 10, 5), LocalDate.of(2026, 10, 6));
+        assertEquals(3, CheckInService.calculateLongestStreak(dates));
+    }
+
+    @Test
+    void longestStreakIgnoresOrder() {
+        // 顺序打乱，结果应该一样
+        var dates = List.of(
+                LocalDate.of(2026, 10, 6), LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 3),
+                LocalDate.of(2026, 10, 2), LocalDate.of(2026, 10, 5));
+        assertEquals(3, CheckInService.calculateLongestStreak(dates));
+    }
+
+    @Test
+    void longestStreakAcrossMonthBoundary() {
+        // 跨月：9-30 和 10-01 是连续的
+        var dates = List.of(LocalDate.of(2026, 9, 29), LocalDate.of(2026, 9, 30), LocalDate.of(2026, 10, 1));
+        assertEquals(3, CheckInService.calculateLongestStreak(dates));
+    }
+
+    // ==================== 颜色深浅 ====================
 
     @Test
     void heatLevelBoundaries() {

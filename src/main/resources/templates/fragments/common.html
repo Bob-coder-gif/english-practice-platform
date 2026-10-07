@@ -26,30 +26,6 @@
             <!-- 已登录才显示功能菜单 -->
             <ul class="navbar-nav me-auto" th:if="${loginUser}">
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/study}"
-                       th:classappend="${currentPath == '/study'} ? 'active'">学习</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/review}"
-                       th:classappend="${currentPath == '/review'} ? 'active'">复习</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/dictation}"
-                       th:classappend="${#strings.startsWith(currentPath, '/dictation')} ? 'active'">听写</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/mistakes}"
-                       th:classappend="${currentPath == '/mistakes'} ? 'active'">错题本</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/stats}"
-                       th:classappend="${currentPath == '/stats'} ? 'active'">统计</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/checkin}"
-                       th:classappend="${currentPath == '/checkin'} ? 'active'">打卡</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" th:href="@{/words}"
                        th:classappend="${currentPath == '/words'} ? 'active'">单词列表</a>
                 </li>
@@ -58,8 +34,10 @@
             <!-- 右侧：用户信息 -->
             <div class="ms-auto d-flex align-items-center gap-2">
                 <th:block th:if="${loginUser}">
-                    <span class="text-muted-app" th:text="${loginUser.username}">[用户名]</span>
-                    <form th:action="@{/logout}" method="post" class="m-0">
+                    <a class="text-muted-app text-decoration-none"
+                       th:href="@{/profile}"
+                       th:classappend="${currentPath == '/profile'} ? 'text-pink fw-semibold'"
+                       th:text="${loginUser.username}">[用户名]</a>                    <form th:action="@{/logout}" method="post" class="m-0">
                         <button type="submit" class="btn btn-sm btn-outline-secondary">退出</button>
                     </form>
                 </th:block>

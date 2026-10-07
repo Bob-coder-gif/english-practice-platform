@@ -169,4 +169,23 @@ public class CheckInService {
         }
         return level;
     }
+
+    // 历史上最长的连续打卡天数
+    public static int calculateLongestStreak(Collection<LocalDate> checkDates) {
+        int longest = 0;
+        int current = 0;
+        LocalDate previous = null;
+
+        // TreeSet：自动去重，并按日期从早到晚排序
+        for (LocalDate date : new TreeSet<>(checkDates)) {
+            if (previous != null && date.equals(previous.plusDays(1))) {
+                current++;          // 和前一天相连，连续天数加一
+            } else {
+                current = 1;        // 断开了，从这一天重新开始计数
+            }
+            longest = Math.max(longest, current);
+            previous = date;
+        }
+        return longest;
+    }
 }

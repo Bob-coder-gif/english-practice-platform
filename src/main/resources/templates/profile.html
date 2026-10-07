@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('个人主页')}"></head>
+<body>
+<nav th:replace="~{fragments/common :: navbar}"></nav>
+
+<main class="container" style="max-width: 760px;">
+
+    <!-- 头部：头像、用户名、注册信息 -->
+    <div class="app-card p-4 mb-3 d-flex align-items-center gap-3">
+        <div class="avatar" th:text="${profile.avatarText()}">J</div>
+        <div>
+            <h1 class="h4 mb-1" th:text="${profile.username}">[用户名]</h1>
+            <div class="text-muted-app small">
+                注册于 <span th:text="${#temporals.format(profile.registeredOn, 'yyyy-MM-dd')}">2026-09-20</span>
+                · 今天是你学习的第 <span th:text="${profile.daysSinceRegistered}">1</span> 天
+            </div>
+        </div>
+    </div>
+
+    <!-- 学习概况 -->
+    <h2 class="h6 text-muted-app mb-2">学习概况</h2>
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="app-card p-3 text-center h-100">
+                <div class="text-muted-app small">累计学过</div>
+                <div class="fs-4 fw-semibold" th:text="${profile.learnedCount}">0</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="app-card p-3 text-center h-100">
+                <div class="text-muted-app small">累计答题</div>
+                <div class="fs-4 fw-semibold" th:text="${profile.totalAnswers}">0</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="app-card p-3 text-center h-100">
+                <div class="text-muted-app small">正确率</div>
+                <div class="fs-4 fw-semibold" th:text="${profile.accuracyPercent()} + '%'">0%</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <a class="app-card p-3 text-center h-100 d-block text-decoration-none text-reset" th:href="@{/mistakes}">
+                <div class="text-muted-app small">错题本</div>
+                <div class="fs-4 fw-semibold" th:text="${profile.mistakeCount}">0</div>
+            </a>
+        </div>
+    </div>
+
+    <!-- 打卡概况 -->
+    <h2 class="h6 text-muted-app mb-2">打卡概况</h2>
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="app-card p-3 text-center h-100">
+                <div class="text-muted-app small">当前连续</div>
+                <div class="fs-4 fw-semibold"><span th:text="${profile.currentStreak}">0</span> 天</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="app-card p-3 text-center h-100">
+                <div class="text-muted-app small">最长连续</div>
+                <div class="fs-4 fw-semibold"><span th:text="${profile.longestStreak}">0</span> 天</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="app-card p-3 text-center h-100">
+                <div class="text-muted-app small">累计打卡</div>
+                <div class="fs-4 fw-semibold"><span th:text="${profile.checkInDays}">0</span> 天</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <a class="app-card p-3 text-center h-100 d-block text-decoration-none text-reset" th:href="@{/checkin}">
+                <div class="text-muted-app small">每日目标</div>
+                <div class="fs-4 fw-semibold"><span th:text="${profile.dailyGoal}">20</span> 题</div>
+            </a>
+        </div>
+    </div>
+
+    <!-- 快捷入口 -->
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a class="btn btn-outline-secondary" th:href="@{/stats}">查看学习统计</a>
+        <a class="btn btn-outline-secondary" th:href="@{/checkin}">查看打卡日历 / 修改每日目标</a>
+    </div>
+
+</main>
+
+<th:block th:replace="~{fragments/common :: scripts}"></th:block>
+</body>
+</html>
