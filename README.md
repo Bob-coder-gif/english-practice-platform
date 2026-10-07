@@ -4,12 +4,11 @@
 
 词库覆盖 **高考、四级、六级、考研、雅思** 五个级别，共 8674 个单词。
 
-<!-- 截图：把页面截图放在 docs/images/ 下，再取消下面的注释 -->
-<!--
+
 | 学习 | 听写 | 打卡日历 |
 |---|---|---|
 | ![学习](docs/images/study.png) | ![听写](docs/images/dictation.png) | ![打卡](docs/images/checkin.png) |
--->
+
 
 ---
 
