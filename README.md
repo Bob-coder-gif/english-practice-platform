@@ -55,12 +55,13 @@ src/main/java/com/jay/englishpracticeplatform
 └── service/        业务逻辑
 
 src/main/resources
+├── db/migration/   Flyway 数据库迁移脚本（表结构的唯一来源）
 ├── templates/      Thymeleaf 页面
 ├── static/         CSS、JavaScript、第三方前端库
 └── vocabulary/     词库数据（words.json）
 
-scripts/            词库提取脚本（Python）
-docs/sql/           需要手动执行的建表语句
+scripts/            词库提取、表结构导出清理脚本（Python）
+docs/images/        README 截图
 ```
 
 ---
@@ -89,6 +90,12 @@ docs/sql/           需要手动执行的建表语句
 - **答题流水表**：每次答题在同一个事务中更新学习状态、写入答题记录、检查打卡，保证三者一致
 - **打卡与历史解耦**：打卡结果单独存储，修改每日目标不会改写过去的打卡记录；日历颜色按固定档位计算，不随目标变化
 - **听写无状态**：题目由单词 id 生成，服务器不在 Session 中保存试卷；交卷后使用 PRG 模式，刷新结果页不会重复记录
+
+### 数据库结构管理
+
+- **Flyway 版本化迁移**：表结构全部写在 `db/migration` 的 SQL 脚本中，每次变更新增一个版本，启动时自动执行；已执行的脚本由校验和保护，不可修改
+- **Hibernate 只做校验**：`ddl-auto=validate`，启动时检查实体与表结构是否一致，不一致则拒绝启动，不再自动修改表
+- **已有数据库平滑接入**：通过 baseline 把现有结构登记为版本 1，新环境则从空库完整执行迁移
 
 ### 查询
 
@@ -126,15 +133,11 @@ docs/sql/           需要手动执行的建表语句
 CREATE DATABASE english_practice DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-**2. 创建「记住我」令牌表**
-
-执行 `docs/sql/persistent_logins.sql`。
-
-**3. 配置数据库账号**
+**2. 配置数据库账号**
 
 复制 `src/main/resources/application-local.properties.example` 为 `application-local.properties`，填写数据库用户名和密码。该文件已被 `.gitignore` 忽略。
 
-**4. 启动**
+**3. 启动**
 
 ```bash
 # Windows
@@ -144,7 +147,7 @@ mvnw.cmd spring-boot:run
 ./mvnw spring-boot:run
 ```
 
-首次启动时会自动建表，并从 `vocabulary/words.json` 导入词库。启动完成后访问 http://localhost:8080 。
+首次启动时，Flyway 会执行 `db/migration` 下的迁移脚本建出所有表，随后从 `vocabulary/words.json` 导入词库。启动完成后访问 http://localhost:8080 。
 
 ### 运行测试
 
@@ -162,8 +165,8 @@ mvnw.cmd test
 
 ## 后续计划
 
-- [ ] 使用 Flyway 管理数据库结构，`ddl-auto` 改为 `validate`
-- [ ] Controller 层测试（MockMvc）
+- [x] 使用 Flyway 管理数据库结构，`ddl-auto` 改为 `validate`
+- [x] Controller 层测试（MockMvc）
 - [ ] 部署上线
 - [ ] 修改密码（同时作废该用户所有的「记住我」令牌）
 - [ ] 个人词库
