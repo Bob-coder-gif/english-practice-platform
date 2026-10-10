@@ -6,15 +6,61 @@
 const STUDY_MODE_KEY = 'studyMode';
 const DEFAULT_STUDY_MODE = 'show-en';
 
-// 朗读一个英文单词；浏览器不支持语音合成时什么也不做
-function speak(text) {
-    if (!text || !('speechSynthesis' in window)) {
+// 单词发音音频地址（有道词典，type=2 美式，type=1 英式）
+// 注意：这不是官方公开的接口，可能失效，所以保留浏览器语音合成作为备用
+const AUDIO_URL = 'https://dict.youdao.com/dictvoice?type=2&audio=';
+
+// 全局只用一个播放器：新的发音会替换正在播放的，连续点击时声音不会叠在一起
+const player = new Audio();
+
+// 每次调用 speak 都编号，用来判断失败回调是不是来自最新一次发音
+let speakId = 0;
+
+// 用浏览器自带的语音合成朗读；不支持时什么也不做
+function speakWithSynthesis(text) {
+    if (!('speechSynthesis' in window)) {
         return;
     }
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
     speechSynthesis.cancel();
     speechSynthesis.speak(utterance);
+}
+
+// 朗读一个英文单词：优先播放真人发音音频，音频加载失败时退回语音合成
+function speak(text) {
+    if (!text) {
+        return;
+    }
+    const id = ++speakId;
+    let fellBack = false;
+
+    // 退回语音合成：同一次发音只退回一次，而且只处理最新一次发音
+    function fallback() {
+        if (fellBack || id !== speakId) {
+            return;
+        }
+        fellBack = true;
+        speakWithSynthesis(text);
+    }
+
+    if ('speechSynthesis' in window) {
+        speechSynthesis.cancel();
+    }
+    player.onerror = fallback;
+    player.src = AUDIO_URL + encodeURIComponent(text);
+
+    const playing = player.play();
+    if (playing !== undefined) {
+        playing.catch(function (error) {
+            // NotAllowedError：浏览器禁止自动播放，换成语音合成也一样会被禁止，不退回
+            // AbortError：被下一次发音打断，属于正常情况
+            if (error.name === 'NotAllowedError' || error.name === 'AbortError') {
+                return;
+            }
+            fallback();
+        });
+    }
 }
 
 // 读取学习模式；浏览器禁用存储时会抛异常，此时使用默认值
