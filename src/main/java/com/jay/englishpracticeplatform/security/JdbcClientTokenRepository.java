@@ -75,4 +75,15 @@ public class JdbcClientTokenRepository implements PersistentTokenRepository {
                 .update();
     }
 
+    //改名时，修改令牌
+    public int updateUsername(String oldUsername,String  newUsername){
+        return jdbcClient.sql("""
+                             UPDATE persistent_logins
+                             SET username = :newUsername
+                             WHERE username = :oldUsername
+                             """)
+                .param("newUsername",newUsername)
+                .param("oldUsername",oldUsername)
+                .update();
+    }
 }

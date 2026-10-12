@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('修改用户名')}"></head>
+<body>
+<nav th:replace="~{fragments/common :: navbar}"></nav>
+
+<main class="container">
+    <div class="app-card p-4 mx-auto" style="max-width: 420px;">
+        <h1 class="h4 mb-3 text-center">修改用户名</h1>
+
+        <p class="text-muted-app small mb-3">
+            当前用户名：<span class="fw-semibold text-reset" th:text="${currentUsername}">Jay</span>。
+            用户名区分大小写，每 <span th:text="${cooldownDays}">3</span> 天只能修改一次。
+        </p>
+
+        <!-- 冷却期内：提示下次可修改时间，并禁用提交按钮（服务端同样会检查） -->
+        <div class="alert alert-warning small" th:if="${nextChangeAt != null}">
+            下次可修改时间：<span th:text="${#temporals.format(nextChangeAt, 'yyyy-MM-dd HH:mm')}">2026-10-15 21:30</span>
+        </div>
+
+        <form th:action="@{/account/username}" th:object="${changeUsernameForm}" method="post" novalidate>
+            <div class="mb-3">
+                <label for="newUsername" class="form-label">新用户名</label>
+                <input type="text" id="newUsername" class="form-control"
+                       th:field="*{newUsername}" th:errorclass="is-invalid">
+                <div class="form-text">3～20 位字母、数字或下划线</div>
+                <div class="invalid-feedback" th:errors="*{newUsername}">[用户名错误]</div>
+            </div>
+
+            <!-- 密码框不用 th:field：出错重新显示页面时，不把输入过的密码填回去 -->
+            <div class="mb-4">
+                <label for="currentPassword" class="form-label">当前密码</label>
+                <input type="password" id="currentPassword" name="currentPassword" class="form-control"
+                       th:classappend="${#fields.hasErrors('currentPassword')} ? 'is-invalid'">
+                <div class="invalid-feedback" th:errors="*{currentPassword}">[密码错误]</div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100"
+                    th:disabled="${nextChangeAt != null}">确认修改</button>
+        </form>
+
+        <p class="text-center text-muted-app mt-3 mb-0">
+            <a th:href="@{/profile}">返回个人主页</a>
+        </p>
+    </div>
+</main>
+
+<th:block th:replace="~{fragments/common :: scripts}"></th:block>
+</body>
+</html>

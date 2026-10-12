@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -34,7 +35,8 @@ public class ProfileService {
     @Transactional(readOnly = true)
     public ProfileView getProfile(Long userId) {
         User user = userRepository.findById(userId).orElseThrow();
-        LocalDate today = LocalDate.now();
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate today = now.toLocalDate();
         LocalDate registeredOn = user.getCreatedAt().toLocalDate();
 
         //累计答题，没有任何答题时，sum的结果是null
@@ -43,6 +45,9 @@ public class ProfileService {
 
         //打卡，当前连续，最长连续，累计天数都基于同一份日期列表计算
         List<LocalDate> checkDates = checkInRepository.findAllDates(userId);
+
+        //现在就能改用户名时为 null，页面上不显示冷却提示
+        LocalDateTime nextUsernameChangeAt = user.canChangeUsername(now) ? null : user.nextUsernameChangeAt();
 
         return new ProfileView(
                 user.getUsername(),
@@ -55,7 +60,8 @@ public class ProfileService {
                 checkDates.size(),
                 CheckInService.calculateStreak(checkDates, today),
                 CheckInService.calculateLongestStreak(checkDates),
-                user.getDailyGoal()
+                user.getDailyGoal(),
+                nextUsernameChangeAt
         );
     }
 }

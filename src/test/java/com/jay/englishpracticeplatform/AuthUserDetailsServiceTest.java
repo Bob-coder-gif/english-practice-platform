@@ -47,6 +47,21 @@ class AuthUserDetailsServiceTest {
     }
 
     @Test
+    void usernameIsCaseSensitive() {
+        User upper = userService.register("CaseTester01", "123456");
+
+        // 大小写不同，就是另一个用户名：查不到
+        assertThrows(UsernameNotFoundException.class,
+                () -> authUserDetailsService.loadUserByUsername("casetester01"));
+
+        // 而且可以被另一个人注册，两个账号互不影响
+        User lower = userService.register("casetester01", "123456");
+        assertNotEquals(upper.getId(), lower.getId());
+        assertEquals(upper.getId(), ((AuthUser) authUserDetailsService.loadUserByUsername("CaseTester01")).getId());
+        assertEquals(lower.getId(), ((AuthUser) authUserDetailsService.loadUserByUsername("casetester01")).getId());
+    }
+
+    @Test
     void eraseCredentialsRemovesPasswordHash() {
         AuthUser user = new AuthUser(1L, "someone", "hash");
 

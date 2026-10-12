@@ -6,6 +6,9 @@
 
 <main class="container" style="max-width: 760px;">
 
+    <!-- 修改用户名、密码成功后的提示（Flash 属性，只显示一次） -->
+    <div class="alert alert-success" th:if="${message}" th:text="${message}">[提示信息]</div>
+
     <!-- 头部：头像、用户名、注册信息 -->
     <div class="app-card p-4 mb-3 d-flex align-items-center gap-3">
         <div class="avatar" th:text="${profile.avatarText()}">J</div>
@@ -19,7 +22,10 @@
     </div>
 
     <!-- 学习概况 -->
-    <h2 class="h6 text-muted-app mb-2">学习概况</h2>
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h2 class="h6 text-muted-app mb-0">学习概况</h2>
+        <a class="small text-decoration-none" th:href="@{/stats}">查看学习统计 →</a>
+    </div>
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-3">
             <div class="app-card p-3 text-center h-100">
@@ -48,7 +54,10 @@
     </div>
 
     <!-- 打卡概况 -->
-    <h2 class="h6 text-muted-app mb-2">打卡概况</h2>
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h2 class="h6 text-muted-app mb-0">打卡概况</h2>
+        <a class="small text-decoration-none" th:href="@{/checkin}">打卡日历 / 修改目标 →</a>
+    </div>
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-3">
             <div class="app-card p-3 text-center h-100">
@@ -76,10 +85,26 @@
         </div>
     </div>
 
-    <!-- 快捷入口 -->
-    <div class="d-flex flex-wrap gap-2 mb-4">
-        <a class="btn btn-outline-secondary" th:href="@{/stats}">查看学习统计</a>
-        <a class="btn btn-outline-secondary" th:href="@{/checkin}">查看打卡日历 / 修改每日目标</a>
+    <!-- 账号设置 -->
+    <h2 class="h6 text-muted-app mb-2">账号设置</h2>
+    <div class="app-card mb-4">
+        <div class="d-flex justify-content-between align-items-center gap-3 p-3 border-bottom">
+            <div>
+                <div class="text-muted-app small">用户名</div>
+                <div class="fw-semibold" th:text="${profile.username}">[用户名]</div>
+                <div class="text-muted-app small" th:if="${profile.nextUsernameChangeAt != null}">
+                    下次可修改：<span th:text="${#temporals.format(profile.nextUsernameChangeAt, 'yyyy-MM-dd HH:mm')}">2026-10-15 21:30</span>
+                </div>
+            </div>
+            <a class="btn btn-outline-secondary btn-sm flex-shrink-0" th:href="@{/account/username}">修改用户名</a>
+        </div>
+        <div class="d-flex justify-content-between align-items-center gap-3 p-3">
+            <div>
+                <div class="text-muted-app small">密码</div>
+                <div class="fw-semibold">******</div>
+            </div>
+            <a class="btn btn-outline-secondary btn-sm flex-shrink-0" th:href="@{/account/password}">修改密码</a>
+        </div>
     </div>
 
 </main>

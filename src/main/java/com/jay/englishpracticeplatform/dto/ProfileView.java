@@ -1,6 +1,7 @@
 package com.jay.englishpracticeplatform.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public record ProfileView(
         String username,
@@ -11,15 +12,16 @@ public record ProfileView(
         long totalAnswers,          //累计答题数
         long correctAnswers,        //累计答对数
         long checkInDays,           //累计打卡天数
-        int currentStreak,         //当前连续打卡
+        int currentStreak,          //当前连续打卡
         int longestStreak,          //最长连续打卡
-        int dailyGoal               //每日目标
+        int dailyGoal,              //每日目标
+        LocalDateTime nextUsernameChangeAt  //下次可修改用户名的时间；现在就能改时为 null
 ) {
     public int accuracyPercent() {
         return totalAnswers == 0 ? 0 : (int) Math.round(correctAnswers * 100.0 / totalAnswers);
     }
 
-    //头像上显示的子，用户名的第一个字符，转为大写
+    //头像上显示的字，用户名的第一个字符，转为大写
     public String avatarText() {
         return username.substring(0, 1).toUpperCase();
     }

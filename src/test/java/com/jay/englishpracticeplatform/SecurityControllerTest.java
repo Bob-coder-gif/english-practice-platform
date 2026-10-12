@@ -55,11 +55,12 @@ class SecurityControllerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"/study", "/review", "/mistakes", "/words", "/stats",
-            "/checkin", "/dictation", "/profile"})
+            "/checkin", "/dictation", "/profile", "/account/username", "/account/password"})
     void protectedPagesRedirectToLogin(String url) throws Exception {
         mockMvc.perform(get(url))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/login"));    }
+                .andExpect(redirectedUrl("/login"));
+    }
 
     // ==================== 登录 ====================
 
@@ -82,6 +83,19 @@ class SecurityControllerTest {
         mockMvc.perform(post("/login")
                         .param("username", "mvclogin02")
                         .param("password", "wrong-password")
+                        .with(csrf()))
+                .andExpect(redirectedUrl("/login?error"))
+                .andExpect(unauthenticated());
+    }
+
+    @Test
+    void loginIsCaseSensitive() throws Exception {
+        userService.register("MvcCase01", PASSWORD);
+
+        // 用户名大小写不一致，即使密码正确也登录失败
+        mockMvc.perform(post("/login")
+                        .param("username", "mvccase01")
+                        .param("password", PASSWORD)
                         .with(csrf()))
                 .andExpect(redirectedUrl("/login?error"))
                 .andExpect(unauthenticated());
@@ -182,6 +196,19 @@ class SecurityControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(view().name("register"))
                 .andExpect(model().attributeHasFieldErrors("registerForm", "username"));
+    }
+
+    @Test
+    void registerAllowsSameNameWithDifferentCase() throws Exception {
+        userService.register("MVCREG04", PASSWORD);
+
+        // 用户名区分大小写：MVCREG04 已存在，mvcreg04 仍然可以注册
+        mockMvc.perform(post("/register")
+                        .param("username", "mvcreg04")
+                        .param("password", PASSWORD)
+                        .param("confirmPassword", PASSWORD)
+                        .with(csrf()))
+                .andExpect(redirectedUrl("/"));
     }
 
     @Test
