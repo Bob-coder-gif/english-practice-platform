@@ -207,3 +207,15 @@ document.querySelectorAll('form[data-submit-once]').forEach(function (form) {
         element.replaceChildren(fragment);
     });
 })();
+
+// ============================================================
+// 自动弹窗：带 data-auto-show 的 Bootstrap 对话框，页面加载后自动打开
+// 目前用于登录后提示最近一次更新
+// ============================================================
+(function () {
+    const modal = document.querySelector('[data-auto-show]');
+    if (!modal || !window.bootstrap) {
+        return;
+    }
+    bootstrap.Modal.getOrCreateInstance(modal).show();
+})();

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('更新日志')}"></head>
+<body>
+<nav th:replace="~{fragments/common :: navbar}"></nav>
+
+<main class="container" style="max-width: 760px;">
+    <h1 class="h4 mb-3">更新日志</h1>
+
+    <div class="app-card p-4 mb-3" th:each="entry, stat : ${entries}">
+        <div class="d-flex justify-content-between align-items-baseline gap-3 mb-2">
+            <h2 class="h6 fw-semibold mb-0">
+                <span th:text="${entry.title}">[标题]</span>
+                <span class="badge badge-app ms-1" th:if="${stat.first}">最新</span>            </h2>
+            <span class="text-muted-app small flex-shrink-0"
+                  th:text="${#temporals.format(entry.date, 'yyyy-MM-dd')}">2026-10-13</span>
+        </div>
+        <ul class="mb-0 ps-3">
+            <li th:each="item : ${entry.items}" th:text="${item}">[更新内容]</li>
+        </ul>
+    </div>
+</main>
+
+<th:block th:replace="~{fragments/common :: scripts}"></th:block>
+</body>
+</html>

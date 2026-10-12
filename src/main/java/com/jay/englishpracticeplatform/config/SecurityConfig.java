@@ -36,7 +36,7 @@ public class SecurityConfig {
                 // 访问规则：白名单之外的所有请求都需要登录
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/", "/login", "/register", "/error",
+                                "/", "/login", "/register", "/changelog", "/error",
                                 "/css/**", "/js/**", "/images/**", "/vendor/**"
                         ).permitAll()
                         .anyRequest().authenticated()

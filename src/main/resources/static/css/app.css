@@ -274,3 +274,9 @@ mark {
         margin-top: 4px;
     }
 }
+
+/* 徽章：品牌粉色（用于更新日志的「最新」标记） */
+.badge-app {
+    background-color: var(--app-pink, #fb7299);
+    color: #fff;
+}

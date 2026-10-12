@@ -125,4 +125,14 @@ class WordServiceTest {
         assertEquals(0, wordService.listWords(null, "%", 0).getTotalElements());
         assertEquals(0, wordService.listWords(null, "_", 0).getTotalElements());
     }
+
+    @Test
+    void chineseSearchCountMatchesResults() {
+        // 只靠释义匹配的搜索：总数必须和实际查到的结果一致
+        Page<Word> page = wordService.listWords(null, "放弃", 0);
+
+        assertTrue(page.getTotalElements() > 0);
+        assertTrue(page.getTotalElements() >= page.getContent().size());
+        page.getContent().forEach(w -> assertTrue(w.getMeaning().contains("放弃")));
+    }
 }

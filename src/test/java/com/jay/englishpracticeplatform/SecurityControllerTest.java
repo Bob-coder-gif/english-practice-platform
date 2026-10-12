@@ -47,7 +47,7 @@ class SecurityControllerTest {
     // ==================== 访问权限 ====================
 
     @ParameterizedTest
-    @ValueSource(strings = {"/", "/login", "/register", "/css/app.css", "/js/app.js"})
+    @ValueSource(strings = {"/", "/login", "/register", "/css/app.css", "/js/app.js","/changelog"})
     void publicResourcesAreAccessibleWithoutLogin(String url) throws Exception {
         mockMvc.perform(get(url))
                 .andExpect(status().isOk());

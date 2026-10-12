@@ -57,24 +57,24 @@ public interface WordRepository extends JpaRepository<Word, Long> {
 
     //在全部单词中搜索，拼写或释义包含关键词
     // 排序：拼写以关键词开头的排最前，拼写包含的其次，只有释义包含的最后；每组内按字母排序
+    // 注意：countQuery 的条件必须和 value 完全一致，否则总数和分页会出错
     @Query(
             value = """
-                    select w from Word w 
+                    select w from Word w
                     where w.spelling like :contains escape '\\'
                         or w.meaning like :contains escape '\\'
-                    order by 
+                    order by
                         case
                             when w.spelling like :prefix escape '\\' then 0
                             when w.spelling like :contains escape '\\' then 1
                             else 2
-                        end ,
+                        end,
                         w.spelling
-                    
                     """,
             countQuery = """
-                    select count (w) from Word w
+                    select count(w) from Word w
                     where w.spelling like :contains escape '\\'
-                        or w.spelling like :contains escape  '\\'
+                        or w.meaning like :contains escape '\\'
                     """
     )
     Page<Word> search(String prefix, String contains, Pageable pageable);
@@ -86,19 +86,19 @@ public interface WordRepository extends JpaRepository<Word, Long> {
                     where l = :level
                         and (w.spelling like :contains escape '\\'
                             or w.meaning like :contains escape '\\')
-                    order by 
-                        case 
+                    order by
+                        case
                             when w.spelling like :prefix escape '\\' then 0
                             when w.spelling like :contains escape '\\' then 1
                             else 2
-                        end ,
+                        end,
                         w.spelling
                     """,
             countQuery = """
-                    select count (w) from Word w join  w.levels l
+                    select count(w) from Word w join w.levels l
                     where l = :level
                         and (w.spelling like :contains escape '\\'
-                            or w.meaning like :contains escape  '\\')
+                            or w.meaning like :contains escape '\\')
                     """
     )
     Page<Word> searchByLevel(WordLevel level, String prefix, String contains, Pageable pageable);
