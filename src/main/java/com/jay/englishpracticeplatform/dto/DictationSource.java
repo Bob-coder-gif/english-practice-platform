@@ -4,7 +4,8 @@ public enum DictationSource {
 
     ALL("全部单词"),
     LEARNED("已学过的单词"),
-    MISTAKES("错题本");
+    MISTAKES("错题本"),
+    COLLECTION("我的词库");
 
     private final String label;
 

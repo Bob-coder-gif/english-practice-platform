@@ -29,6 +29,10 @@
                     <a class="nav-link" th:href="@{/words}"
                        th:classappend="${currentPath == '/words'} ? 'active'">单词列表</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/collection}"
+                       th:classappend="${currentPath == '/collection'} ? 'active'">我的词库</a>
+                </li>
             </ul>
 
             <!-- 搜索：在全部级别中搜索，结果显示在单词列表页 -->

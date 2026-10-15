@@ -55,7 +55,7 @@ class SecurityControllerTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"/study", "/review", "/mistakes", "/words", "/stats",
-            "/checkin", "/dictation", "/profile", "/account/username", "/account/password"})
+            "/checkin", "/dictation", "/profile", "/account/username", "/account/password", "/collection"})
     void protectedPagesRedirectToLogin(String url) throws Exception {
         mockMvc.perform(get(url))
                 .andExpect(status().is3xxRedirection())

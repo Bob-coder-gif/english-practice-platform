@@ -33,13 +33,16 @@ public class DictationService {
     private final WordRepository wordRepository;
     private final UserWordRepository userWordRepository;
     private final StudyService studyService;
+    private final CollectionService collectionService;
 
     public DictationService(WordRepository wordRepository,
                             UserWordRepository userWordRepository,
-                            StudyService studyService) {
+                            StudyService studyService,
+                            CollectionService collectionService) {
         this.wordRepository = wordRepository;
         this.userWordRepository = userWordRepository;
         this.studyService = studyService;
+        this.collectionService = collectionService;
     }
 
     //====================预习，随机选出一组单词============
@@ -50,6 +53,8 @@ public class DictationService {
             case ALL -> wordRepository.findRandomIdsByLevel(level.name(), count);
             case LEARNED -> wordRepository.findRandomLearnedIds(userId, level.name(), count);
             case MISTAKES -> userWordRepository.findRandomMistakeWordIds(userId, StudyService.MASTERED_STREAK, count);
+            // 我的词库：和错题本一样，不按级别筛选
+            case COLLECTION -> collectionService.randomWordIds(userId, count);
         };
 
         List<DictationQuestion> words = new ArrayList<>();
@@ -173,7 +178,7 @@ public class DictationService {
         return submission.getLevel() == null ? WordLevel.CET4 : submission.getLevel();
     }
 
-    //统一格式，起吊首尾空格，多个空格合并为一个，转为小写
+    //统一格式，去掉首尾空格，多个空格合并为一个，转为小写
     public static String normalize(String text) {
         if (text == null) {
             return "";

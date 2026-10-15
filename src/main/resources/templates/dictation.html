@@ -23,7 +23,7 @@
 
         <div class="mb-4">
             <div class="form-label">单词来源</div>
-            <div class="btn-group" role="group">
+            <div class="btn-group flex-wrap" role="group">
                 <th:block th:each="s : ${sources}">
                     <input type="radio" class="btn-check" name="source"
                            th:id="'source-' + ${s}" th:value="${s}" th:checked="${s.name() == 'ALL'}">
@@ -31,7 +31,7 @@
                            th:text="${s.label}">[来源]</label>
                 </th:block>
             </div>
-            <div class="form-text">选择「错题本」时，会从全部级别的错题中出题</div>
+            <div class="form-text">选择「错题本」或「我的词库」时，不区分级别，从全部单词中出题</div>
         </div>
 
         <div class="mb-4">

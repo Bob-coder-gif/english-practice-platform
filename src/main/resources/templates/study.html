@@ -6,20 +6,24 @@
 
 <main class="container" style="max-width: 720px;">
 
-    <!-- 级别切换 -->
+    <!-- 切换：各个级别 + 我的词库 -->
     <ul class="nav nav-pills mb-3">
         <li class="nav-item" th:each="lv : ${levels}">
             <a class="nav-link"
                th:href="@{/study(level=${lv})}"
                th:text="${lv.label}"
-               th:classappend="${lv == currentLevel} ? 'active'">[级别]</a>
+               th:classappend="${!collection and lv == currentLevel} ? 'active'">[级别]</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:href="@{/study(collection=true)}"
+               th:classappend="${collection} ? 'active'">我的词库</a>
         </li>
     </ul>
 
     <!-- 学习进度 -->
     <div class="app-card p-3 mb-3">
         <div class="d-flex justify-content-between mb-2">
-            <span><span th:text="${currentLevel.label}">[级别]</span>学习进度</span>
+            <span><span th:text="${collection} ? '我的词库' : ${currentLevel.label}">[级别]</span>学习进度</span>
             <span class="text-muted-app">
                 <span th:text="${learnedCount}">0</span> / <span th:text="${totalCount}">0</span>
             </span>
@@ -60,17 +64,35 @@
                   th:action="@{/study/answer}" method="post">
                 <input type="hidden" name="wordId" th:value="${word.id}">
                 <input type="hidden" name="level" th:value="${currentLevel}">
+                <input type="hidden" name="collection" th:value="${collection}">
                 <button type="submit" name="known" value="true" class="btn btn-primary px-4">认识</button>
                 <button type="submit" name="known" value="false" class="btn btn-outline-secondary px-4">不认识</button>
             </form>
         </div>
     </th:block>
 
-    <!-- 全部学完 -->
-    <div class="app-card p-5 text-center" th:unless="${word}">
-        <div class="fs-1 mb-2">🎉</div>
-        <p class="mb-0">这个级别的单词已经全部学过了！</p>
-    </div>
+    <!-- 没有新单词 -->
+    <th:block th:unless="${word}">
+        <!-- 我的词库是空的 -->
+        <div class="app-card p-5 text-center" th:if="${collection and totalCount == 0}">
+            <div class="fs-1 mb-2">📚</div>
+            <p class="mb-3">我的词库还是空的，先去收藏一些单词吧。</p>
+            <a class="btn btn-primary" th:href="@{/collection}">去收藏单词</a>
+        </div>
+
+        <!-- 我的词库全部学过 -->
+        <div class="app-card p-5 text-center" th:if="${collection and totalCount > 0}">
+            <div class="fs-1 mb-2">🎉</div>
+            <p class="mb-3">我的词库中的单词已经全部学过了！</p>
+            <a class="btn btn-outline-secondary" th:href="@{/review}">去复习</a>
+        </div>
+
+        <!-- 某个级别全部学过 -->
+        <div class="app-card p-5 text-center" th:unless="${collection}">
+            <div class="fs-1 mb-2">🎉</div>
+            <p class="mb-0">这个级别的单词已经全部学过了！</p>
+        </div>
+    </th:block>
 
 </main>
 

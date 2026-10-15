@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/common :: head('我的词库')}"></head>
+<body>
+<nav th:replace="~{fragments/common :: navbar}"></nav>
+
+<main class="container">
+
+    <div class="alert alert-success" th:if="${message}" th:text="${message}">[提示信息]</div>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}">[错误信息]</div>
+
+    <!-- 头部：数量和快捷入口 -->
+    <div class="app-card p-4 mb-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div>
+            <h1 class="h4 mb-1">我的词库</h1>
+            <div class="text-muted-app small">
+                已收藏 <span class="fw-semibold" th:text="${count}">0</span> / <span th:text="${maxSize}">600</span> 个单词
+            </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2" th:if="${count > 0}">
+            <a class="btn btn-primary btn-sm" th:href="@{/study(collection=true)}">学习我的词库</a>
+            <a class="btn btn-outline-secondary btn-sm" th:href="@{/dictation}">去听写</a>
+        </div>
+    </div>
+
+    <!-- 搜索并收藏 -->
+    <div class="app-card p-3 mb-3">
+        <form class="mb-0" th:action="@{/collection}" method="get">
+            <label for="collectionSearch" class="form-label small text-muted-app">在全部词库中搜索要收藏的单词</label>
+            <div class="input-group" style="max-width: 460px;">
+                <input type="search" id="collectionSearch" name="q" class="form-control"
+                       placeholder="输入英文或中文，如 ban、放弃"
+                       th:value="${q}"
+                       th:maxlength="${T(com.jay.englishpracticeplatform.service.WordService).MAX_KEYWORD_LENGTH}"
+                       autocomplete="off" autocapitalize="off" spellcheck="false">
+                <button type="submit" class="btn btn-primary">搜索</button>
+                <a class="btn btn-outline-secondary" th:if="${q != ''}" th:href="@{/collection}">清除</a>
+            </div>
+        </form>
+
+        <!-- 搜索结果 -->
+        <th:block th:if="${searchResults != null}">
+            <div class="table-responsive mt-3" th:if="${!searchResults.isEmpty()}" th:data-highlight="${q}">
+                <table class="table table-hover align-middle mb-0">
+                    <tbody>
+                    <tr th:each="w : ${searchResults}">
+                        <td class="fw-semibold" style="width: 18%;" data-highlight-text th:text="${w.spelling}">[单词]</td>
+                        <td class="phonetic" style="width: 18%;">
+                            <span th:if="${w.phonetic}" th:text="'/' + ${w.phonetic} + '/'">[音标]</span>
+                        </td>
+                        <td class="meaning" data-highlight-text th:text="${w.meaning}">[释义]</td>
+                        <td class="text-end text-nowrap" style="width: 140px;">
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    th:data-speak="${w.spelling}">🔊
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" disabled
+                                    th:if="${collectedIds.contains(w.id)}">已收藏
+                            </button>
+                            <form class="d-inline" th:unless="${collectedIds.contains(w.id)}"
+                                  th:action="@{/collection/add}" method="post" data-submit-once>
+                                <input type="hidden" name="wordId" th:value="${w.id}">
+                                <input type="hidden" name="q" th:value="${q}">
+                                <button type="submit" class="btn btn-sm btn-primary">收藏</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <div class="form-text">只显示最匹配的前 20 个结果，找不到时可以换个更准确的关键词</div>
+            </div>
+            <div class="text-muted-app mt-3" th:if="${searchResults.isEmpty()}">
+                词库中没有找到匹配的单词。
+            </div>
+        </th:block>
+    </div>
+
+    <!-- 已收藏的单词 -->
+    <div class="app-card p-3">
+        <h2 class="h6 text-muted-app mb-2">已收藏的单词</h2>
+
+        <div class="table-responsive" th:if="${count > 0}">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                <tr>
+                    <th style="width: 18%;">单词</th>
+                    <th style="width: 18%;">音标</th>
+                    <th>释义</th>
+                    <th style="width: 140px;"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="c : ${collectionPage.content}">
+                    <td class="fw-semibold" th:text="${c.word.spelling}">[单词]</td>
+                    <td class="phonetic">
+                        <span th:if="${c.word.phonetic}" th:text="'/' + ${c.word.phonetic} + '/'">[音标]</span>
+                    </td>
+                    <td class="meaning" th:text="${c.word.meaning}">[释义]</td>
+                    <td class="text-end text-nowrap">
+                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                th:data-speak="${c.word.spelling}">🔊
+                        </button>
+                        <form class="d-inline" th:action="@{/collection/remove}" method="post" data-submit-once>
+                            <input type="hidden" name="wordId" th:value="${c.word.id}">
+                            <input type="hidden" name="page" th:value="${currentPage}">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">移除</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="text-center text-muted-app py-4" th:if="${count == 0}">
+            我的词库还是空的。在上面搜索单词，点「收藏」就能加进来。
+        </div>
+    </div>
+
+    <!-- 分页 -->
+    <ul class="pagination justify-content-center my-3" th:if="${totalPages > 1}">
+        <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+            <a class="page-link" th:href="@{/collection(page=${currentPage - 1}, q=${q})}">上一页</a>
+        </li>
+        <li class="page-item active">
+            <span class="page-link">
+                <span th:text="${currentPage}">1</span> / <span th:text="${totalPages}">1</span>
+            </span>
+        </li>
+        <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+            <a class="page-link" th:href="@{/collection(page=${currentPage + 1}, q=${q})}">下一页</a>
+        </li>
+    </ul>
+
+</main>
+
+<th:block th:replace="~{fragments/common :: scripts}"></th:block>
+</body>
+</html>
