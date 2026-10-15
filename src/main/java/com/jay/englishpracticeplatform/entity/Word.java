@@ -31,6 +31,17 @@ public class Word {
     @Column(nullable = false, length = 500)
     private String meaning;
 
+    // 来源：考试词库，或从扩展词典收藏进来的。新建的 Word 默认是 CORE
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(nullable = false, length = 16)
+    private WordSource source = WordSource.CORE;
+
+    // 是否来自扩展词典，模板里用来显示「扩展」标记
+    public boolean isExtended() {
+        return source == WordSource.EXTENDED;
+    }
+
     @ElementCollection
     @CollectionTable(
             name = "word_levels",

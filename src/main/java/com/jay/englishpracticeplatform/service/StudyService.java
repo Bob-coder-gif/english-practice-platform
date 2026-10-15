@@ -97,6 +97,12 @@ public class StudyService {
         return userWordRepository.countByUserIdAndNextReviewAtLessThanEqual(userId, LocalDateTime.now());
     }
 
+    // 错题本中的单词数量
+    @Transactional(readOnly = true)
+    public long countMistakes(Long userId) {
+        return userWordRepository.countMistakes(userId, MASTERED_STREAK);
+    }
+
     // 错题本：按不认识的次数从多到少，次数相同的，最近学过的排在前面
     @Transactional(readOnly = true)
     public Page<UserWord> listMistakes(Long userId, int page) {

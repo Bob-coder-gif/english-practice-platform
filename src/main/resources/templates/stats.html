@@ -27,7 +27,7 @@
             </a>
         </div>
         <div class="col-6 col-md-3">
-            <a class="app-card p-3 text-center d-block text-decoration-none text-reset" th:href="@{/mistakes}">
+            <a class="app-card p-3 text-center d-block text-decoration-none text-reset" th:href="@{/review(tab='mistakes')}">
                 <div class="text-muted-app small">错题本</div>
                 <div class="fs-3 fw-semibold" th:text="${stats.mistakeCount}">0</div>
             </a>

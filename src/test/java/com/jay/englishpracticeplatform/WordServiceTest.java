@@ -2,6 +2,7 @@ package com.jay.englishpracticeplatform;
 
 import com.jay.englishpracticeplatform.entity.Word;
 import com.jay.englishpracticeplatform.entity.WordLevel;
+import com.jay.englishpracticeplatform.repository.WordRepository;
 import com.jay.englishpracticeplatform.service.WordService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,8 @@ class WordServiceTest {
 
     @Autowired
     private WordService wordService;
+
+    @Autowired private WordRepository wordRepository;
 
     // ==================== 列表 ====================
 
@@ -46,7 +49,7 @@ class WordServiceTest {
 
     @Test
     void blankKeywordListsEverything() {
-        assertEquals(wordService.countAll(), wordService.listWords(null, "  ", 0).getTotalElements());
+        assertEquals(wordRepository.count(), wordService.listWords(null, "  ", 0).getTotalElements());
         assertEquals(wordService.countByLevel(WordLevel.CET4),
                 wordService.listWords(WordLevel.CET4, "", 0).getTotalElements());
     }

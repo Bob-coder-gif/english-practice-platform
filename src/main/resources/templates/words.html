@@ -56,7 +56,10 @@
                 <tbody>
                 <tr th:each="w : ${wordPage.content}">
                     <!-- data-highlight-text：这一格里的匹配文字需要高亮 -->
-                    <td class="fw-semibold" data-highlight-text th:text="${w.spelling}">[单词]</td>
+                    <td class="fw-semibold">
+                        <span data-highlight-text th:text="${w.spelling}">[单词]</span>
+                        <span class="badge badge-ext ms-1" th:if="${w.extended}">扩展</span>
+                    </td>
                     <td class="phonetic">
                         <span th:if="${w.phonetic}" th:text="'/' + ${w.phonetic} + '/'">[音标]</span>
                     </td>

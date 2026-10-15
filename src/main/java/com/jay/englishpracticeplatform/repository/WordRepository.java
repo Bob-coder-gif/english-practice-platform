@@ -2,6 +2,8 @@ package com.jay.englishpracticeplatform.repository;
 
 import com.jay.englishpracticeplatform.entity.Word;
 import com.jay.englishpracticeplatform.entity.WordLevel;
+import com.jay.englishpracticeplatform.entity.WordSource;   // 新增
+
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,8 +11,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface WordRepository extends JpaRepository<Word, Long> {
+
+    // spelling 列不区分大小写（utf8mb4_unicode_ci），所以 Apple 和 apple 查到的是同一个
+    Optional<Word> findBySpelling(String spelling);
+
+    // 某个来源的单词数量（首页只统计考试词库，不算用户收藏进来的扩展词）
+    long countBySource(WordSource source);
 
     @Query("select count(w) from Word w join w.levels l where l = :level")
     long countByLevel(WordLevel level);

@@ -280,3 +280,11 @@ mark {
     background-color: var(--app-pink, #fb7299);
     color: #fff;
 }
+
+/* 徽章：扩展词（从扩展词典收藏进来的单词） */
+.badge-ext {
+    background-color: var(--app-blue, #00aeec);
+    color: #fff;
+    font-weight: normal;
+    vertical-align: middle;
+}

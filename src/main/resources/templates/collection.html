@@ -26,10 +26,12 @@
     <!-- 搜索并收藏 -->
     <div class="app-card p-3 mb-3">
         <form class="mb-0" th:action="@{/collection}" method="get">
-            <label for="collectionSearch" class="form-label small text-muted-app">在全部词库中搜索要收藏的单词</label>
+            <label for="collectionSearch" class="form-label small text-muted-app">
+                搜索要收藏的单词或短语（考试词库 + 约 9.6 万词条的扩展词典）
+            </label>
             <div class="input-group" style="max-width: 460px;">
                 <input type="search" id="collectionSearch" name="q" class="form-control"
-                       placeholder="输入英文或中文，如 ban、放弃"
+                       placeholder="输入英文或中文，如 give up、放弃"
                        th:value="${q}"
                        th:maxlength="${T(com.jay.englishpracticeplatform.service.WordService).MAX_KEYWORD_LENGTH}"
                        autocomplete="off" autocapitalize="off" spellcheck="false">
@@ -38,13 +40,18 @@
             </div>
         </form>
 
-        <!-- 搜索结果 -->
         <th:block th:if="${searchResults != null}">
-            <div class="table-responsive mt-3" th:if="${!searchResults.isEmpty()}" th:data-highlight="${q}">
+
+            <!-- 结果一：words 表中的单词（考试词库，以及别人收藏过的扩展词） -->
+            <h2 class="h6 text-muted-app mt-3 mb-2" th:if="${!searchResults.isEmpty()}">词库中的单词</h2>
+            <div class="table-responsive" th:if="${!searchResults.isEmpty()}" th:data-highlight="${q}">
                 <table class="table table-hover align-middle mb-0">
                     <tbody>
                     <tr th:each="w : ${searchResults}">
-                        <td class="fw-semibold" style="width: 18%;" data-highlight-text th:text="${w.spelling}">[单词]</td>
+                        <td class="fw-semibold" style="width: 18%;">
+                            <span data-highlight-text th:text="${w.spelling}">[单词]</span>
+                            <span class="badge badge-ext ms-1" th:if="${w.extended}">扩展</span>
+                        </td>
                         <td class="phonetic" style="width: 18%;">
                             <span th:if="${w.phonetic}" th:text="'/' + ${w.phonetic} + '/'">[音标]</span>
                         </td>
@@ -66,10 +73,44 @@
                     </tr>
                     </tbody>
                 </table>
-                <div class="form-text">只显示最匹配的前 20 个结果，找不到时可以换个更准确的关键词</div>
             </div>
-            <div class="text-muted-app mt-3" th:if="${searchResults.isEmpty()}">
-                词库中没有找到匹配的单词。
+
+            <!-- 结果二：扩展词典中的词条（words 表中还没有的） -->
+            <h2 class="h6 text-muted-app mt-3 mb-2" th:if="${!dictResults.isEmpty()}">
+                扩展词典 <span class="badge badge-ext ms-1">扩展</span>
+            </h2>
+            <div class="table-responsive" th:if="${!dictResults.isEmpty()}" th:data-highlight="${q}">
+                <table class="table table-hover align-middle mb-0">
+                    <tbody>
+                    <tr th:each="d : ${dictResults}">
+                        <td class="fw-semibold" style="width: 18%;">
+                            <span data-highlight-text th:text="${d.word}">[单词]</span>
+                            <span class="badge text-bg-light ms-1" th:if="${d.phrase}">短语</span>
+                        </td>
+                        <td class="phonetic" style="width: 18%;">
+                            <span th:if="${d.phonetic}" th:text="'/' + ${d.phonetic} + '/'">[音标]</span>
+                        </td>
+                        <td class="meaning" data-highlight-text th:text="${d.translation}">[释义]</td>
+                        <td class="text-end text-nowrap" style="width: 140px;">
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    th:data-speak="${d.word}">🔊
+                            </button>
+                            <form class="d-inline" th:action="@{/collection/add-entry}" method="post" data-submit-once>
+                                <input type="hidden" name="entryId" th:value="${d.id}">
+                                <input type="hidden" name="q" th:value="${q}">
+                                <button type="submit" class="btn btn-sm btn-primary">收藏</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="form-text mt-2" th:if="${!searchResults.isEmpty() || !dictResults.isEmpty()}">
+                每部分最多显示 20 个结果。英文按开头匹配，找不到时可以换个更准确的关键词
+            </div>
+            <div class="text-muted-app mt-3" th:if="${searchResults.isEmpty() && dictResults.isEmpty()}">
+                没有找到匹配的单词或短语。
             </div>
         </th:block>
     </div>
@@ -90,7 +131,10 @@
                 </thead>
                 <tbody>
                 <tr th:each="c : ${collectionPage.content}">
-                    <td class="fw-semibold" th:text="${c.word.spelling}">[单词]</td>
+                    <td class="fw-semibold">
+                        <span th:text="${c.word.spelling}">[单词]</span>
+                        <span class="badge badge-ext ms-1" th:if="${c.word.extended}">扩展</span>
+                    </td>
                     <td class="phonetic">
                         <span th:if="${c.word.phonetic}" th:text="'/' + ${c.word.phonetic} + '/'">[音标]</span>
                     </td>

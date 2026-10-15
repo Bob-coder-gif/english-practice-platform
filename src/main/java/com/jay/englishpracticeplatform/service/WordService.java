@@ -3,6 +3,7 @@ package com.jay.englishpracticeplatform.service;
 import com.jay.englishpracticeplatform.entity.Word;
 import com.jay.englishpracticeplatform.entity.WordLevel;
 import com.jay.englishpracticeplatform.repository.WordRepository;
+import com.jay.englishpracticeplatform.entity.WordSource;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -48,9 +49,10 @@ public class WordService {
                 : wordRepository.searchByLevel(level, prefix, contains, unsorted);
     }
 
+    // 考试词库的单词数量（不包括用户从扩展词典收藏进来的词）
     @Transactional(readOnly = true)
-    public long countAll() {
-        return wordRepository.count();
+    public long countCore() {
+        return wordRepository.countBySource(WordSource.CORE);
     }
 
     @Transactional(readOnly = true)

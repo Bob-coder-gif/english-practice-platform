@@ -164,48 +164,48 @@ document.querySelectorAll('form[data-submit-once]').forEach(function (form) {
     }
     speak(target.dataset.autospeak);
 })();
-
 // ============================================================
 // 搜索结果高亮：容器上的 data-highlight 是关键词，
 // 容器里带 data-highlight-text 的元素，会把匹配的部分用 <mark> 标出来
+// 一个页面可以有多个这样的容器（比如我的词库的两组搜索结果）
 // 只用 createTextNode 和 textContent 构造内容，不用 innerHTML，避免 XSS
 // ============================================================
 (function () {
-    const container = document.querySelector('[data-highlight]');
-    if (!container) {
-        return;
-    }
-    const keyword = container.dataset.highlight.trim();
-    if (!keyword) {
-        return;
-    }
-    const lowerKeyword = keyword.toLowerCase();
+    document.querySelectorAll('[data-highlight]').forEach(highlightContainer);
 
-    container.querySelectorAll('[data-highlight-text]').forEach(function (element) {
-        const text = element.textContent;
-        const lowerText = text.toLowerCase();
-        let index = lowerText.indexOf(lowerKeyword);
-        if (index === -1) {
+    function highlightContainer(container) {
+        const keyword = container.dataset.highlight.trim();
+        if (!keyword) {
             return;
         }
+        const lowerKeyword = keyword.toLowerCase();
 
-        // 按「普通文字 - 匹配文字 - 普通文字 ……」的顺序逐段创建节点
-        const fragment = document.createDocumentFragment();
-        let start = 0;
-        while (index !== -1) {
-            fragment.appendChild(document.createTextNode(text.slice(start, index)));
+        container.querySelectorAll('[data-highlight-text]').forEach(function (element) {
+            const text = element.textContent;
+            const lowerText = text.toLowerCase();
+            let index = lowerText.indexOf(lowerKeyword);
+            if (index === -1) {
+                return;
+            }
 
-            const mark = document.createElement('mark');
-            mark.textContent = text.slice(index, index + keyword.length);
-            fragment.appendChild(mark);
+            // 按「普通文字 - 匹配文字 - 普通文字 ……」的顺序逐段创建节点
+            const fragment = document.createDocumentFragment();
+            let start = 0;
+            while (index !== -1) {
+                fragment.appendChild(document.createTextNode(text.slice(start, index)));
 
-            start = index + keyword.length;
-            index = lowerText.indexOf(lowerKeyword, start);
-        }
-        fragment.appendChild(document.createTextNode(text.slice(start)));
+                const mark = document.createElement('mark');
+                mark.textContent = text.slice(index, index + keyword.length);
+                fragment.appendChild(mark);
 
-        element.replaceChildren(fragment);
-    });
+                start = index + keyword.length;
+                index = lowerText.indexOf(lowerKeyword, start);
+            }
+            fragment.appendChild(document.createTextNode(text.slice(start)));
+
+            element.replaceChildren(fragment);
+        });
+    }
 })();
 
 // ============================================================

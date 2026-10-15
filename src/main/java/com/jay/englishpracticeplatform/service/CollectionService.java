@@ -44,12 +44,12 @@ public class CollectionService {
         return collectionRepository.countByUserId(userId);
     }
 
-    //我的词库列别，时间顺序
+    //我的词库列表，最近收藏的排在前面
     @Transactional(readOnly = true)
     public Page<UserCollection> listMyWords(Long userId, int page) {
         int safePage = Math.max(page, 0);
         Sort sort = Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id"));
-        return collectionRepository.findPageByUserId(userId, PageRequest.of(safePage, PAGE_SIZE));
+        return collectionRepository.findPageByUserId(userId, PageRequest.of(safePage, PAGE_SIZE, sort));
     }
 
     //在全部词库中搜索要收藏的单词：直接复用单词列表的搜索

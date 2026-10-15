@@ -17,7 +17,7 @@ public class HomeController {
 
     @GetMapping("/")
     public String index(Model model) {
-        model.addAttribute("wordCount", wordService.countAll());
+        model.addAttribute("wordCount", wordService.countCore());
         return "index";
     }
 }
