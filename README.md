@@ -1,134 +1,3 @@
-
-Diagnosing a port conflict from another running instance.
-Diagnosing a port conflict from another running instance.
-这次是新代码，好消息先说：
-
-Successfully validated 6 migrations
-Current version of schema `english_practice`: 6
-V6 已经执行过了。说明在这次之前，你已经成功启动过一次新代码，或者跑过测试，表结构和词典数据在那时就建好、导入了。
-
-这次启动失败的原因：8080 端口被占用
-Web server failed to start. Port 8080 was already in use.
-一个端口同一时间只能被一个程序监听。之前启动的那个程序还在运行，占着 8080，所以新启动的这个拿不到端口，只能退出。这和代码没有关系。
-
-解决办法（任选一种）：
-
-在 IDEA 里停掉：看底部「运行」窗口的各个标签，或者顶部工具栏，凡是有红色方块 ■ 亮着的，都点一下停止，然后再启动。
-IDEA 里找不到的话，用命令行查是谁占着端口：在 PowerShell 或 cmd 里执行
-netstat -ano | findstr :8080
-最后一列是进程号（PID），比如 12345，然后执行
-
-taskkill /PID 12345 /F
-确认词典导入成功
-因为导入只在第一次启动时执行，这次的日志里看不到。在 MySQL 里查一下：
-
-sql
-SELECT COUNT(*) FROM dict_entries;   -- 应该是 96387
-SELECT source, COUNT(*) FROM words GROUP BY source;   -- CORE 8674，收藏过扩展词的话还有 EXTENDED
-如果第一个结果是 0，就把 IDEA 里那次成功启动的日志找出来发给我。
-
-截图里的插件报错
-「Python Portable 与 IDE 不兼容」是 IDEA 的插件冲突，和项目无关。直接点 Disable Python Portable 关掉它，IDEA 自带的 Python 支持已经够用。
-
-端口释放后再启动一次，按上次说的那几项手动测一遍，然后跑全部测试。
-
-Microsoft Windows [版本 10.0.26200.9457]
-(c) Microsoft Corporation。保留所有权利。
-
-C:\Users\18320>   netstat -ano | findstr :8080
-TCP    0.0.0.0:8080           0.0.0.0:0              LISTENING       18648
-TCP    100.64.8.2:65328       43.135.106.161:8080    ESTABLISHED     28776
-TCP    [::]:8080              [::]:0                 LISTENING       18648
-
-C:\Users\18320>taskkill /PID 18648
-错误: 无法终止 PID 为 18648 的进程。
-原因: 只能强行终止这个进程(带 /F 选项)。
-
-C:\Users\18320>
-
-mysql> SHOW DATABASES
--> ;
-+--------------------+
-| Database           |
-+--------------------+
-| english_practice   |
-| information_schema |
-| performance_schema |
-+--------------------+
-3 rows in set (0.01 sec)
-
-mysql> USE english_practice;
-Database changed
-mysql> SELECT COUNT(*) FROM dict_entries;
-+----------+
-| COUNT(*) |
-+----------+
-|    96387 |
-+----------+
-1 row in set (0.01 sec)
-
-mysql> SELECT source, COUNT(*) FROM wrods GROUP BY source;
-ERROR 1146 (4
-
-两处都是小问题。
-
-1. taskkill 要加 /F
-   提示已经说了，这个进程只能强制结束：
-
-taskkill /PID 18648 /F
-只杀 18648。它是 LISTENING（监听）状态，占着 8080 的就是它，也就是你之前没关掉的那个项目实例。
-第二行 PID 28776 不要动。它是你电脑上某个程序去连别人服务器的 8080（43.135.106.161:8080），本地 8080 是空的，和你的项目无关。
-两者的区别：本地地址:8080 + LISTENING 表示"我在 8080 上等别人连"；远程地址:8080 + ESTABLISHED 表示"我连到了别人的 8080"。
-2. 表名拼错了
-   wrods → words：
-
-sql
-SELECT source, COUNT(*) FROM words GROUP BY source;
-3. 词典导入成功
-   dict_entries 是 96387 条，和脚本输出完全一致，扩展词典这部分没问题了。
-
-杀掉进程后重新启动项目，按顺序手动测一下：
-
-搜 give u，收藏 give up；
-搜「苹果」；
-用「我的词库」学习、听写；
-看复习页的两个标签；
-打开 /mistakes，应该会跳转。
-然后跑全部测试。
-
-面试准备_英语练习平台.doc
-面试准备_英语练习平台.doc
-DOC
-欧克了，给我更新一下readme，在这后面更新一下最近的内容，最后给我讲怎么部署
-
-Shared a file, read a file, and 15 more steps
-更新面试准备文档的最新内容。
-更新面试文档的readme内容。
-Checking whether test files moved into a different directory.
-Tracking down a missing test file and untracked changes.
-Drafting the README text with the added introductory line.
-Spotting a version mismatch in the README documentation.
-三件事都做完了：面试文档、README、部署步骤。不过提交前有两个问题必须先处理。我刚看了你项目的 git status，发现：
-
-DictionaryImporterTest.java 不见了。 main 和 test 下面都没有这个文件，可能是移动的时候删掉了。请重新建：src/test/java/com/jay/englishpracticeplatform/init/DictionaryImporterTest.java，内容用上上条消息里的代码。
-src/main/resources/dictionary/ 还没被 Git 跟踪（状态显示 ??）。如果漏提交，服务器拉到的代码里就没有这个数据文件，程序启动时 DictionaryImporter 找不到它，整个网站都起不来。提交前用 git add -A，然后用 git status 确认它变成了 A。
-一、面试文档
-文件是 面试准备_英语练习平台.doc，保持了你原来的格式。
-
-修正了 4 处已经过时的内容：
-第 0 节项目介绍：加上了我的词库、扩展词典、改密码让其他设备下线；
-Q4.6「改密码后怎么处理」：原来写的是"下一个要做的功能"，改成"已实现"；
-Q8.2 发音：改成"优先真人音频 + 语音合成兜底"，并保留了"手机自动朗读仍会被拦截"这个不足。
-末尾新增第 12 节，共 11 题。 重点看 Q12.5 方案对比、Q12.7 并发收藏与可重复读快照、Q12.8 批量导入与原子性，这三题最能体现思考深度。
-Q12.8 里写了我讨论方案时说错过一个理由（"数据放 Flyway 会让每次测试都慢"），后来改正了。面试时这样讲"判断有误、后来纠正"，比假装一开始就全对更可信。
-检查清单加了一项：能讲清楚 Q12.7。
-二、README（完整版，直接替换）
-相比上次给你的 7 处改动，这次又多改了 3 处：
-
-开头加了扩展词典的介绍；
-"运行测试"的说明里加上了扩展词典；
-你原来的 README 写的是 MySQL（开发 26.7），这个版本号不存在。 你本地日志里显示的是 MySQL 8.4，两处都已改成 8.4。
-markdown
 # 英语练习打卡平台
 
 一个基于 **Spring Boot** 的英语单词学习网站：背单词、间隔复习、错题本、听写、每日打卡、学习统计，以及可以收藏单词的个人词库。
@@ -180,28 +49,30 @@ markdown
 ---
 
 ## 项目结构
+
+```
 src/main/java/com/jay/englishpracticeplatform
-├── config/ 配置：Spring Security、密码加密
-├── controller/ 控制器：接收请求、组织页面数据
-├── dto/ 数据传输对象：页面展示用的数据、表单
-├── entity/ JPA 实体
-├── exception/ 业务异常
-├── init/ 启动时导入数据：考试词库、扩展词典
-├── repository/ 数据访问
-├── security/ 登录相关：用户加载、「记住我」令牌存储、登录事件监听、刷新登录状态
-└── service/ 业务逻辑
+├── config/        配置：Spring Security、密码加密
+├── controller/    控制器：接收请求、组织页面数据
+├── dto/           数据传输对象：页面展示用的数据、表单
+├── entity/        JPA 实体
+├── exception/     业务异常
+├── init/          启动时导入数据：考试词库、扩展词典
+├── repository/    数据访问
+├── security/      登录相关：用户加载、「记住我」令牌存储、登录事件监听、刷新登录状态
+└── service/       业务逻辑
 
 src/main/resources
-├── db/migration/ Flyway 数据库迁移脚本（表结构的唯一来源）
-├── templates/ Thymeleaf 页面
-├── static/ CSS、JavaScript、第三方前端库
-├── vocabulary/ 考试词库数据（words.json）
-├── dictionary/ 扩展词典数据（dict_entries.tsv.gz）
+├── db/migration/  Flyway 数据库迁移脚本（表结构的唯一来源）
+├── templates/     Thymeleaf 页面
+├── static/        CSS、JavaScript、第三方前端库
+├── vocabulary/    考试词库数据（words.json）
+├── dictionary/    扩展词典数据（dict_entries.tsv.gz）
 └── changelog.json 更新日志，随代码一起发布
 
-scripts/ 词库提取、扩展词典生成、表结构导出清理脚本（Python）
-docs/images/ README 截图
-
+scripts/           词库提取、扩展词典生成、表结构导出清理脚本（Python）；索引性能对比脚本（PowerShell）
+docs/images/       README 截图
+```
 
 ---
 
@@ -265,7 +136,7 @@ docs/images/ README 截图
 - **聚合查询**：统计数据使用 `GROUP BY` 和条件计数在数据库中完成，不把明细数据搬到内存里计算
 - **避免 N+1 查询**：复习和错题本查询使用 `JOIN FETCH` 一次性加载关联的单词，并单独编写计数查询
 - **搜索排序**：在 SQL 中用 `CASE WHEN` 自定义排序，以搜索词开头的结果优先
-- **索引设计**：答题记录按 `(user_id, answered_at)` 建立联合索引，支撑按时间范围的统计查询
+- **索引设计**：答题记录按 `(user_id, answered_at)` 建立联合索引，打卡判定、按天 / 按模式统计等按时间范围的查询由「取出该用户全部记录再过滤」变为索引范围扫描，实测数据见[性能测试](#性能测试)
 
 ### 安全
 
@@ -276,6 +147,111 @@ docs/images/ README 截图
 - **会话**：禁用 URL 会话跟踪，会话 ID 只通过 Cookie 传递，避免出现在网址中
 - **输入处理**：所有用户输入在服务端校验；搜索时转义 `LIKE` 通配符；页面输出统一转义，前端高亮使用文本节点构造而非 `innerHTML`，防止 XSS
 - **越权**：当前用户身份只从登录状态中获取，不信任请求中提交的用户 id；收藏、取消收藏只能操作自己的词库
+
+---
+
+## 性能测试
+
+验证 `answer_records` 上 `(user_id, answered_at)` 联合索引的实际效果。测试脚本：`scripts/bench-index.ps1`。
+
+### 测试条件
+
+- 独立的压测库 `english_bench`，不使用开发库和线上数据
+- 答题流水共 **100 万条**：200 个用户，每人 5000 条，时间随机分布在过去一年内，4 种答题模式随机分布
+- 本地 Windows + MySQL 8.4；每条 SQL 先执行一次把数据页读进缓冲池，记录第二次的 `EXPLAIN ANALYZE` 结果
+- 接口测试请求学习统计页：每轮预热 5 次 + 正式 50 次，共 3 轮，取 P50
+
+「优化前」为只有 `user_id` 单列索引的状态（外键必须有一个以 `user_id` 开头的索引，所以这才是加联合索引之前的真实状态，而不是全表扫描）。
+
+### SQL 层面
+
+| 查询 | 用途 | 优化前 | 优化后 |
+|---|---|---|---|
+| `countBetween` | 打卡判定：今日答题数 | 扫描 5000 行，约 31 ms | 扫描 9 行，0.04 ms |
+| `countByMode` | 统计页：今日各模式答题数 | 扫描 5000 行，约 22 ms | 扫描 9 行，0.06 ms |
+| `countByDay` | 统计页：近 7 天每日答题数 | 扫描 5000 行，约 24 ms | 扫描 98 行，0.2 ms |
+| `countByDay` | 打卡日历：本月每日答题数 | 扫描 5000 行，约 34 ms | 扫描 220 行，0.12 ms |
+| `summarize` | 统计页：累计答题数和答对数 | 扫描 5000 行 | 扫描 5000 行（无时间条件，用不到联合索引的第二列） |
+
+优化前，MySQL 先按 `user_id` 取出该用户的全部 5000 条记录，逐条回表后再按时间过滤；优化后直接在索引上定位时间范围，且除 `countByMode` 外都只读索引、不回表（覆盖索引）。
+
+毫秒数会随缓冲池状态和机器负载波动（同一执行计划的 `summarize` 在几次测试中从 11 ms 到 35 ms 不等），**扫描行数是稳定、可复现的指标**。
+
+### 接口层面
+
+| 状态 | 第 1 轮 P50 | 第 2 轮 P50 | 第 3 轮 P50 |
+|---|---|---|---|
+| 优化前 | 82.7 ms | 73.1 ms | 75.4 ms |
+| 优化后 | 43.5 ms | 44.5 ms | 44.3 ms |
+
+学习统计页 P50 由约 75 ms 降至约 44 ms。
+
+### 尝试过但未采用：覆盖索引
+
+把索引扩展为 `(user_id, answered_at, mode, correct)` 后，上面 5 条查询全部变为覆盖索引扫描，`summarize` 也不再回表（约 5.6 ms）。但统计页还包含十余条其他查询和页面渲染，接口 P50 三轮分别为 34.7 / 49.9 / 41.4 ms，与现有索引的差异在测量误差范围内。考虑到更宽的索引会增加每次答题写入的维护成本，暂未采用。
+
+### 如何复现
+
+<details>
+<summary>展开查看步骤</summary>
+
+**1. 建压测库并授权（root 执行）**
+
+```sql
+CREATE DATABASE english_bench DEFAULT CHARSET utf8mb4;
+GRANT ALL PRIVILEGES ON english_bench.* TO 'jay'@'localhost';
+```
+
+**2. 用压测库启动应用**
+
+新建 `src/main/resources/application-bench.properties`（已被 `.gitignore` 忽略），配置连接 `english_bench`，并加上 `spring.jpa.show-sql=false`。以程序实参 `--spring.profiles.active=bench` 启动，Flyway 会自动建表、导入词库。然后在网页上注册账号 `bench1`。
+
+**3. 造数据（在 `english_bench` 中执行，同一个会话内完成）**
+
+```sql
+SET SESSION cte_max_recursion_depth = 1000000;
+
+-- 复制 bench1 的密码哈希，造 bench2 ~ bench200
+SET @hash = (SELECT password_hash FROM users WHERE username = 'bench1');
+INSERT INTO users (username, password_hash, created_at)
+WITH RECURSIVE seq(n) AS (SELECT 2 UNION ALL SELECT n + 1 FROM seq WHERE n < 200)
+SELECT CONCAT('bench', n), @hash, NOW(6) FROM seq;
+
+-- 给用户和单词编连续序号（id 可能不连续）
+CREATE TEMPORARY TABLE tmp_u AS
+SELECT id, ROW_NUMBER() OVER (ORDER BY id) - 1 AS rn FROM users WHERE username LIKE 'bench%';
+ALTER TABLE tmp_u ADD PRIMARY KEY (rn);
+CREATE TEMPORARY TABLE tmp_w AS
+SELECT id, ROW_NUMBER() OVER (ORDER BY id) - 1 AS rn FROM words;
+ALTER TABLE tmp_w ADD PRIMARY KEY (rn);
+SET @wc = (SELECT COUNT(*) FROM tmp_w);
+
+-- 100 万条答题流水
+INSERT INTO answer_records (user_id, word_id, correct, mode, answered_at)
+WITH RECURSIVE seq(n) AS (SELECT 0 UNION ALL SELECT n + 1 FROM seq WHERE n < 999999)
+SELECT u.id, w.id, RAND() < 0.7,
+       ELT(1 + FLOOR(RAND() * 4), 'LEARN', 'REVIEW', 'DICTATION_EN', 'DICTATION_CN'),
+       NOW(6) - INTERVAL FLOOR(RAND() * 365 * 24 * 60) MINUTE
+FROM seq
+JOIN tmp_u u ON u.rn = n % 200
+JOIN tmp_w w ON w.rn = (n * 7919) % @wc;
+
+ANALYZE TABLE answer_records;
+```
+
+**4. 运行脚本**
+
+```powershell
+# 只需一次：保存 MySQL 登录信息（密码加密存储在本机，不写进脚本）
+mysql_config_editor set --login-path=bench --host=localhost --user=jay --password
+
+# 浏览器用 bench1 登录后，复制 Cookie 中的 JSESSIONID
+powershell -ExecutionPolicy Bypass -File .\scripts\bench-index.ps1 -Cookie "JSESSIONID=..."
+```
+
+脚本依次切换三种索引状态，分别执行 SQL 和接口测试，结束（包括中途出错）时自动恢复原索引。完整执行计划保存在 `scripts/bench-result-*.txt`。
+
+</details>
 
 ---
 
@@ -329,7 +305,10 @@ mvnw.cmd test
 ## 部署
 
 线上环境部署在一台 2 核 4G 的云服务器上（Ubuntu 24.04）：
+
+```
 浏览器 ──80──▶ Nginx ──▶ Spring Boot (127.0.0.1:8080) ──▶ MySQL 8.0 (127.0.0.1:3306)
+```
 
 
 | 方面 | 做法 |
@@ -367,76 +346,3 @@ mvnw.cmd test
 - 单词发音音频来自有道词典的公开发音地址，加载失败时使用浏览器自带的语音合成
 - [Bootstrap](https://getbootstrap.com/)，MIT License
 - [Chart.js](https://www.chartjs.org/)，MIT License
-  三、部署步骤
-  第 1 步：本地提交（在 IDEA 的终端里）
-  bash
-# 1. 补回 DictionaryImporterTest，替换 README，然后跑全部测试，确认通过
-mvnw.cmd test
-
-# 2. 加入所有改动，并检查
-git add -A
-git status
-git status 的输出里要检查三点：
-
-必须有 src/main/resources/dictionary/dict_entries.tsv.gz，前面是 A；
-必须没有 application-local.properties；
-必须没有任何 .sql 备份文件。
-确认后提交并推送：
-
-bash
-git commit -m "feat: 我的词库接入 ECDICT 扩展词典；错题本合并到复习页，首页入口调整；更新 README"
-git push
-第 2 步：登录服务器，先备份
-bash
-ssh deploy@122.51.247.76
-
-# 看一下磁盘剩余空间，至少要有几百 MB
-df -h /
-
-# 手动备份数据库：这次部署会修改表结构，按规矩先备份
-mkdir -p ~/manual-backups
-sudo mysqldump --single-transaction english_practice | gzip > ~/manual-backups/before-v6-$(date +%F-%H%M).sql.gz
-ls -lh ~/manual-backups/
-备份文件应该有几十 KB 到几 MB。如果是 0 字节，就说明备份失败，先停下来，不要继续部署。
-
-sudo mysqldump 会以 root 身份登录 MySQL。服务器的 root 用的是 auth_socket 认证，所以不用输入数据库密码，也就不会把密码留在命令历史里。
-
-第 3 步：部署
-bash
-~/deploy.sh
-脚本会依次拉代码、打包（跳过测试）、替换、重启，然后检查是否启动成功。
-
-第 4 步：确认迁移和导入
-bash
-# 看这次启动的关键日志
-sudo journalctl -u english-practice -n 300 --no-pager | grep -E "Migrating|扩展词典|词库|Started|ERROR"
-你应该能看到：
-
-Migrating schema ... to version "6 - add dictionary"。如果之前账号设置那批（V2–V4）还没上线，这里会连着出现 V2、V3、V4、V5、V6，这是正常的；
-扩展词典导入完成：读取 96387 条，写入 96387 条；
-Started EnglishPracticePlatformApplication。
-再到数据库里核对一遍，只执行 SELECT：
-
-bash
-sudo mysql english_practice -e "SELECT version, description, success FROM flyway_schema_history ORDER BY installed_rank;"
-sudo mysql english_practice -e "SELECT COUNT(*) FROM dict_entries; SELECT source, COUNT(*) FROM words GROUP BY source;"
-每一行的 success 都应该是 1，dict_entries 应该是 96387 条。
-
-第 5 步：用手机打开网站验证
-登录后应该弹出「我的词库与扩展词典」的更新提示；
-首页第 4 格是「我的词库」，导航栏里没有「我的词库」了；
-搜 give u 并收藏 give up；
-复习页的两个标签都正常；
-打开 /mistakes，应该跳转到错题本。
-如果出问题
-先别急着回滚。 把 journalctl 里最后一个 Caused by 发给我，一起看。
-万一真要退回旧版本：这次的迁移 V2–V6 都只是"加表、加列、改排序规则"，旧版本的 jar 在新表结构上也能运行。所以只回滚 jar，不要动数据库。不要执行任何 DROP 或 DELETE，也不要手动改 flyway_schema_history。
-
-面试准备 英语练习平台
-DOC
-
-
-
-
-Claude is AI and can make mistakes.
-Claude finished the response
