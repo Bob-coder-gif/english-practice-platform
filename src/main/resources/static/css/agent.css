@@ -1,0 +1,196 @@
+/* ============================================================
+   AI 助手：右下角悬浮球 + 悬浮窗（所有已登录页面都有）
+   ============================================================ */
+
+/* 悬浮窗和悬浮球的层级：比页面内容高，比 Bootstrap 弹窗（1050 以上）低，
+   这样「更新日志」弹窗出现时会盖住悬浮窗 */
+.agent-fab,
+.agent-panel {
+    z-index: 1035;
+}
+
+/* ===== 悬浮球 ===== */
+.agent-fab {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    width: 56px;
+    height: 56px;
+    border: none;
+    border-radius: 50%;
+    background-color: var(--app-pink);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform .15s, background-color .15s;
+}
+
+.agent-fab:hover {
+    background-color: var(--app-pink-dark);
+    transform: scale(1.06);
+}
+
+.agent-fab:focus-visible {
+    outline: 3px solid var(--app-blue);
+    outline-offset: 2px;
+}
+
+/* ===== 悬浮窗 ===== */
+.agent-panel {
+    position: fixed;
+    right: 24px;
+    bottom: 92px;
+    width: 380px;
+    height: min(600px, calc(100vh - 120px));
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, .2);
+    overflow: hidden;
+}
+
+/* display: flex 会盖过 hidden 属性的默认效果，所以要显式写一条 */
+.agent-panel[hidden] {
+    display: none;
+}
+
+.agent-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .625rem .75rem .625rem 1rem;
+    border-bottom: 1px solid #e3e5e7;
+}
+
+.agent-panel-actions {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+}
+
+.agent-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: .75rem;
+}
+
+.agent-form {
+    display: flex;
+    gap: .5rem;
+    padding: .625rem .75rem 0;
+    border-top: 1px solid #e3e5e7;
+}
+
+.agent-form textarea {
+    resize: none;
+    font-size: .875rem;
+}
+
+.agent-footnote {
+    padding: .25rem .75rem .5rem;
+    font-size: .7rem;
+    color: var(--app-text-muted);
+}
+
+/* ===== 消息 ===== */
+.agent-msg {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: .75rem;
+}
+
+.agent-msg-user {
+    align-items: flex-end;
+}
+
+.agent-msg-assistant,
+.agent-msg-error {
+    align-items: flex-start;
+}
+
+.agent-bubble {
+    max-width: 90%;
+    padding: .5rem .75rem;
+    border-radius: var(--app-radius);
+    font-size: .875rem;
+    white-space: pre-wrap;      /* 保留模型回答里的换行 */
+    word-break: break-word;
+}
+
+.agent-msg-user .agent-bubble {
+    background-color: var(--app-pink-light);
+    color: var(--app-text);
+}
+
+.agent-msg-assistant .agent-bubble {
+    background-color: var(--app-bg);
+}
+
+.agent-msg-error .agent-bubble {
+    background-color: #fdecec;
+    color: #b42318;
+}
+
+.agent-pending .agent-bubble {
+    color: var(--app-text-muted);
+}
+
+/* ===== 工具调用过程（点击展开） ===== */
+.agent-tools {
+    max-width: 90%;
+    font-size: .75rem;
+    color: var(--app-text-muted);
+    margin-bottom: .25rem;
+}
+
+.agent-tools summary {
+    cursor: pointer;
+    user-select: none;
+}
+
+.agent-tool-call {
+    margin-top: .5rem;
+    padding-left: .75rem;
+    border-left: 2px solid var(--app-pink-light);
+}
+
+.agent-tool-title {
+    font-weight: 600;
+    color: var(--app-text);
+}
+
+.agent-tool-label {
+    margin-top: .25rem;
+}
+
+.agent-tool-call pre {
+    margin: .125rem 0 0;
+    padding: .375rem .5rem;
+    font-size: .7rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    background-color: var(--app-bg);
+    border-radius: 4px;
+}
+
+/* ===== 手机：悬浮窗占满屏幕，打开时隐藏悬浮球 ===== */
+@media (max-width: 575.98px) {
+    .agent-fab {
+        right: 16px;
+        bottom: 16px;
+    }
+
+    .agent-panel {
+        inset: 0;
+        width: auto;
+        height: auto;
+        border-radius: 0;
+    }
+
+    .agent-fab[aria-expanded="true"] {
+        display: none;
+    }
+}
