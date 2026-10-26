@@ -6,6 +6,7 @@ import com.jay.englishpracticeplatform.agent.tool.Tool;
 import com.jay.englishpracticeplatform.agent.tool.ToolContext;
 import com.jay.englishpracticeplatform.agent.tool.ToolRegistry;
 import com.jay.englishpracticeplatform.exception.AgentException;
+import com.jay.englishpracticeplatform.exception.AgentQuotaExceededException;
 import org.junit.jupiter.api.Test;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
@@ -22,6 +23,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 /**
  * agent 循环的单元测试：用按剧本返回结果的假模型，不联网、不花钱、每次结果都一样。
@@ -31,6 +37,8 @@ class AgentServiceTest {
 
     private final JsonMapper mapper = JsonMapper.builder().build();
     private final ToolContext ctx = new ToolContext(7L);
+    // 额度服务用 Mockito 的假对象：默认 acquire 什么也不做（表示额度充足），需要时再让它抛异常
+    private final AgentUsageService usage = mock(AgentUsageService.class);
 
     // ===== 测试替身 =====
 
@@ -75,9 +83,9 @@ class AgentServiceTest {
 
     private AgentService service(FakeLlmClient llm, int maxSteps) {
         AgentProperties props = new AgentProperties(true, "test-key", "http://localhost",
-                "test-model", 100, maxSteps, Duration.ofSeconds(5));
+                "test-model", 100, maxSteps, Duration.ofSeconds(5), 30, 0);
         ToolRegistry registry = new ToolRegistry(List.of(new EchoTool()), mapper);
-        return new AgentService(llm, registry, mapper, props);
+        return new AgentService(llm, registry, mapper, props, usage);
     }
 
     /** 模型直接回答 */
@@ -195,6 +203,8 @@ class AgentServiceTest {
                 () -> service.chat(history, "a".repeat(AgentService.MAX_INPUT_LENGTH + 1), ctx));
         assertTrue(llm.requests.isEmpty());
         assertEquals(0, history.size());
+        // 输入不合法时不扣额度
+        verify(usage, never()).acquire(anyLong());
     }
 
     @Test
@@ -234,5 +244,16 @@ class AgentServiceTest {
                 // 新的一轮没有调用工具，不能带上上一轮的工具
                 new AgentService.ChatLine("assistant", "直接回答", List.of())
         ), lines);
+    }
+
+    @Test
+    void quotaExceededDoesNotCallModel() {
+        doThrow(new AgentQuotaExceededException("今天的次数用完了")).when(usage).acquire(7L);
+        FakeLlmClient llm = new FakeLlmClient();   // 空剧本：一旦请求模型就会失败
+        ArrayNode history = mapper.createArrayNode();
+
+        assertThrows(AgentQuotaExceededException.class, () -> service(llm, 5).chat(history, "你好", ctx));
+        assertTrue(llm.requests.isEmpty());
+        assertEquals(0, history.size());
     }
 }

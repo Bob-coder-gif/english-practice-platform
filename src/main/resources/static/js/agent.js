@@ -16,6 +16,7 @@
     const sendBtn = document.getElementById('agentSend');
     const clearBtn = document.getElementById('agentClear');
     const closeBtn = document.getElementById('agentClose');
+    const quotaEl = document.getElementById('agentQuota');
 
     // POST 请求必须带上 CSRF 令牌，否则 Spring Security 返回 403
     const postHeaders = {
@@ -54,10 +55,11 @@
         panel.hidden = false;
         fab.setAttribute('aria-expanded', 'true');
         rememberOpen(true);
-        // 第一次打开时才加载历史，不在每个页面一打开就请求
+        // 第一次打开时才加载历史和额度，不在每个页面一打开就请求
         if (!historyLoaded) {
             historyLoaded = true;
             loadHistory();
+            loadQuota();
         }
         if (focus) {
             input.focus();
@@ -141,6 +143,12 @@
         return row;
     }
 
+    // 底部显示今天还剩几次；用完时变红
+    function showQuota(remaining) {
+        quotaEl.textContent = '今日剩余 ' + remaining + ' 次';
+        quotaEl.classList.toggle('agent-quota-empty', remaining === 0);
+    }
+
     function setBusy(value) {
         busy = value;
         sendBtn.disabled = value;
@@ -180,7 +188,12 @@
             pending.remove();
             if (res.ok) {
                 addMessage('assistant', data.reply || '（没有回复内容）', data.toolCalls);
+                showQuota(data.remaining);
             } else {
+                // 429：今天的额度用完了
+                if (res.status === 429) {
+                    showQuota(0);
+                }
                 addMessage('error', data.error || '出错了，请稍后再试');
             }
         } catch (e) {
@@ -203,6 +216,17 @@
         }
     }
 
+    async function loadQuota() {
+        try {
+            const res = await request(panel.dataset.quotaUrl, {method: 'GET'});
+            if (res.ok) {
+                showQuota((await res.json()).remaining);
+            }
+        } catch (e) {
+            // 加载失败只是不显示剩余次数
+        }
+    }
+
     // ===== 输入 =====
 
     form.addEventListener('submit', event => {
@@ -212,7 +236,13 @@
             return;
         }
         input.value = '';
-        send(text);
+
+        const command = COMMANDS[text.toLowerCase()];
+        if (command) {
+            command();
+        } else {
+            send(text);
+        }
     });
 
     // Enter 发送，Shift + Enter 换行；输入法正在选字时（isComposing）按 Enter 不发送
@@ -228,18 +258,28 @@
         button.addEventListener('click', () => send(button.textContent.trim()));
     });
 
-    clearBtn.addEventListener('click', async () => {
-        if (busy) {
+    async function clearConversation(){
+        if(busy){
             return;
         }
-        try {
-            await request(panel.dataset.clearUrl, {method: 'POST', headers: postHeaders});
+        try{
+            await request(panel.dataset.clearUrl,{method: 'POST', headers: postHeaders});
             messagesEl.querySelectorAll('.agent-msg').forEach(node => node.remove());
             emptyHint.hidden = false;
-        } catch (e) {
-            addMessage('error', '清空失败，请稍后再试');
         }
-    });
+        catch (e){
+            addMessage('error', '清空错误，请稍后重试');
+        }
+    }
+
+    clearBtn.addEventListener('click', clearConversation);
+
+    //本地命令：在浏览器里执行，不发给模型，不扣额度
+    const COMMANDS = {
+        '/clear' : clearConversation,
+        '/help' : () => addMessage('assistant',
+            '可用命令：\n/clear 清空对话 \n/help \n\n其他内容会直接发给 AI 助手。')
+    }
 
     // 上一个页面里悬浮窗是打开的：自动恢复，但不抢焦点
     try {

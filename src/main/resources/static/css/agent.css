@@ -95,6 +95,15 @@
     color: var(--app-text-muted);
 }
 
+/* 今日剩余次数：有内容时后面加一个分隔点；用完时变红 */
+#agentQuota:not(:empty)::after {
+    content: " · ";
+}
+
+.agent-quota-empty {
+    color: #b42318;
+}
+
 /* ===== 消息 ===== */
 .agent-msg {
     display: flex;

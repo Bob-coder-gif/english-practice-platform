@@ -3,8 +3,10 @@ package com.jay.englishpracticeplatform.controller;
 import com.jay.englishpracticeplatform.agent.AgentService;
 import com.jay.englishpracticeplatform.agent.AgentService.AgentReply;
 import com.jay.englishpracticeplatform.agent.AgentService.ChatLine;
+import com.jay.englishpracticeplatform.agent.AgentUsageService;
 import com.jay.englishpracticeplatform.agent.tool.ToolContext;
 import com.jay.englishpracticeplatform.exception.AgentException;
+import com.jay.englishpracticeplatform.exception.AgentQuotaExceededException;
 import com.jay.englishpracticeplatform.security.AuthUser;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -41,16 +43,19 @@ public class AgentController {
     static final String SESSION_KEY = "agent.history";
 
     private final AgentService agentService;
+    private final AgentUsageService usageService;
     private final JsonMapper mapper;
 
-    public AgentController(AgentService agentService, JsonMapper mapper) {
+    public AgentController(AgentService agentService, AgentUsageService usageService, JsonMapper mapper) {
         this.agentService = agentService;
+        this.usageService = usageService;
         this.mapper = mapper;
     }
 
     public record ChatRequest(String message) {}
 
-    public record ChatResponse(String reply, List<AgentService.ToolCall> toolCalls) {}
+    /** remaining：这次提问之后，今天还剩几次 */
+    public record ChatResponse(String reply, List<AgentService.ToolCall> toolCalls, int remaining) {}
 
     @PostMapping("/chat")
     public ChatResponse chat(@AuthenticationPrincipal AuthUser loginUser,
@@ -61,12 +66,19 @@ public class AgentController {
         AgentReply reply = agentService.chat(history, request.message(), new ToolContext(loginUser.getId()));
         // 只有成功时才保存：失败时 history 已经被回滚，不保存也一样
         saveHistory(session, history);
-        return new ChatResponse(reply.reply(), reply.toolCalls());
+        int remaining = usageService.quota(loginUser.getId()).remaining();
+        return new ChatResponse(reply.reply(), reply.toolCalls(), remaining);
     }
 
     @GetMapping("/history")
     public List<ChatLine> history(HttpSession session) {
         return AgentService.visibleLines(loadHistory(session));
+    }
+
+    /** 今天的额度：悬浮窗打开时显示「今日剩余 N 次」 */
+    @GetMapping("/quota")
+    public AgentUsageService.Quota quota(@AuthenticationPrincipal AuthUser loginUser) {
+        return usageService.quota(loginUser.getId());
     }
 
     @PostMapping("/clear")
@@ -100,6 +112,13 @@ public class AgentController {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> badRequest(IllegalArgumentException e) {
         return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+    }
+
+    // 额度用完：429 Too Many Requests。它是 AgentException 的子类，
+    // Spring 会选择匹配得最具体的处理方法，所以走这里而不是下面的 503
+    @ExceptionHandler(AgentQuotaExceededException.class)
+    public ResponseEntity<Map<String, String>> quotaExceeded(AgentQuotaExceededException e) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of("error", e.getMessage()));
     }
 
     @ExceptionHandler(AgentException.class)

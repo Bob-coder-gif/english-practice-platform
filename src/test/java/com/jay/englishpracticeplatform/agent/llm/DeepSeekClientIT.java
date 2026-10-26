@@ -26,7 +26,7 @@ class DeepSeekClientIT {
         // 不启动 Spring，直接 new：测试更快，也不需要数据库
         AgentProperties props = new AgentProperties(true, key,
                 "https://api.deepseek.com/chat/completions", "deepseek-chat",
-                50, 5, Duration.ofSeconds(60));
+                50, 5, Duration.ofSeconds(60), 30, 0);
         JsonMapper mapper = JsonMapper.builder().build();
         DeepSeekClient client = new DeepSeekClient(props, mapper);
 

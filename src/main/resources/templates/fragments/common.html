@@ -148,6 +148,7 @@
                  th:data-chat-url="@{/agent/chat}"
                  th:data-history-url="@{/agent/history}"
                  th:data-clear-url="@{/agent/clear}"
+                 th:data-quota-url="@{/agent/quota}"
                  th:data-csrf-header="${_csrf.headerName}"
                  th:data-csrf-token="${_csrf.token}">
 
@@ -178,7 +179,10 @@
                           placeholder="Enter 发送，Shift + Enter 换行" required></textarea>
                 <button type="submit" id="agentSend" class="btn btn-primary">发送</button>
             </form>
-            <div class="agent-footnote">回答由 AI 生成，单词释义以平台词典为准。</div>
+            <div class="agent-footnote">
+                <span id="agentQuota"></span>
+                回答由 AI 生成，单词释义以平台词典为准；对话内容会发送给 DeepSeek 处理。
+            </div>
         </section>
 
         <script th:src="@{/js/agent.js}"></script>

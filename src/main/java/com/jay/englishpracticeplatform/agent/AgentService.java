@@ -45,6 +45,8 @@ public class AgentService {
             3. 你只能查看数据，不能修改学习记录、答题记录和打卡；用户要求修改时，告诉他到对应页面操作。
             4. 与英语学习无关、或要求输出大量内容的请求，简短说明后引导回英语学习。
             5. 回答简洁，使用纯文本，不要使用 Markdown 格式（页面不会渲染 Markdown）。
+            6. 你能做的只有调用上面提供的工具。没有对应工具的操作（比如清空对话、修改设置），
+               绝不能说自己已经做了；用户想清空对话时，告诉他点右上角的「清空」按钮，或者输入 /clear。
             """;
 
     /** 一次工具调用：工具名、模型给的参数、工具返回的结果（页面展示用，可能被截断） */
@@ -59,12 +61,15 @@ public class AgentService {
     private final LlmClient llm;
     private final ToolRegistry registry;
     private final JsonMapper mapper;
+    private final AgentUsageService usageService;
     private final int maxSteps;
 
-    public AgentService(LlmClient llm, ToolRegistry registry, JsonMapper mapper, AgentProperties props) {
+    public AgentService(LlmClient llm, ToolRegistry registry, JsonMapper mapper,
+                        AgentProperties props, AgentUsageService usageService) {
         this.llm = llm;
         this.registry = registry;
         this.mapper = mapper;
+        this.usageService = usageService;
         this.maxSteps = props.maxSteps();
     }
 
@@ -81,6 +86,9 @@ public class AgentService {
         if (text.length() > MAX_INPUT_LENGTH) {
             throw new IllegalArgumentException("一条消息最多 " + MAX_INPUT_LENGTH + " 个字");
         }
+
+        // 输入合法才扣额度：空消息、超长消息不算次数。额度用完会抛出异常，不会请求模型
+        usageService.acquire(ctx.userId());
 
         int turnStart = history.size();
         history.addObject()

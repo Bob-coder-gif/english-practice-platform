@@ -16,6 +16,9 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ObjectNode;
+import com.jay.englishpracticeplatform.agent.AgentProperties;
+import org.springframework.jdbc.core.simple.JdbcClient;
+import java.time.LocalDate;
 
 import java.io.IOException;
 
@@ -48,6 +51,12 @@ class AgentControllerTest {
 
     @Autowired
     private JsonMapper mapper;
+
+    @Autowired
+    private JdbcClient jdbcClient;
+
+    @Autowired
+    private AgentProperties agentProperties;
 
     @MockitoBean
     private LlmClient llmClient;
@@ -146,5 +155,45 @@ class AgentControllerTest {
                         .contentType(MediaType.APPLICATION_JSON).content(body("你好")))
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(jsonPath("$.error").value("AI 服务暂时不可用，请稍后再试"));
+    }
+
+    // ===== 每日限额 =====
+
+    @Test
+    void chatReturnsRemainingQuota() throws Exception {
+        modelAnswers("Hi!");
+
+        mockMvc.perform(post("/agent/chat").with(loginAs("agent_remaining")).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON).content(body("你好")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.remaining").value(agentProperties.dailyLimit() - 1));
+    }
+
+    @Test
+    void quotaEndpointShowsFullQuotaForNewUser() throws Exception {
+        mockMvc.perform(get("/agent/quota").with(loginAs("agent_quota")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.used").value(0))
+                .andExpect(jsonPath("$.limit").value(agentProperties.dailyLimit()))
+                .andExpect(jsonPath("$.remaining").value(agentProperties.dailyLimit()));
+    }
+
+    @Test
+    void exhaustedQuotaReturns429WithoutCallingModel() throws Exception {
+        int limit = agentProperties.dailyLimit();
+        User registered = userService.register("agent_exhausted", "123456");
+        // 直接把今天的次数写成上限，模拟已经用完
+        jdbcClient.sql("INSERT INTO agent_usage (user_id, usage_date, request_count) VALUES (?, ?, ?)")
+                .params(registered.getId(), LocalDate.now(), limit)
+                .update();
+        RequestPostProcessor login =
+                user(new AuthUser(registered.getId(), registered.getUsername(), registered.getPasswordHash()));
+
+        mockMvc.perform(post("/agent/chat").with(login).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON).content(body("你好")))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.error").value("今天的 " + limit + " 次提问已经用完了，明天再来吧"));
+
+        verify(llmClient, never()).chat(any(), any());
     }
 }
