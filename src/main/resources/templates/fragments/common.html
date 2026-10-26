@@ -9,6 +9,8 @@
     <title th:text="${title} + ' - 英语练习打卡平台'">[标题]</title>
     <link rel="stylesheet" th:href="@{/vendor/bootstrap/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/agent.css}"
+          th:if="${loginUser != null and @environment.getProperty('agent.enabled') == 'true'}">
 </head>
 
 <!-- ==================== 导航栏 ==================== -->
@@ -129,6 +131,62 @@
 
     <script th:src="@{/vendor/bootstrap/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/js/app.js}"></script>
+    <!-- AI 助手：已登录且功能开启时才输出 -->
+    <th:block th:if="${loginUser != null and @environment.getProperty('agent.enabled') == 'true'}">
+
+        <button type="button" id="agentFab" class="agent-fab"
+                aria-label="AI 学习助手" aria-controls="agentPanel" aria-expanded="false">
+            <!-- 对话气泡图标 -->
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+        </button>
+
+        <!-- 接口地址和 CSRF 令牌放在 data-* 属性里，由 agent.js 读取 -->
+        <section id="agentPanel" class="agent-panel" role="dialog" aria-label="AI 学习助手" hidden
+                 th:data-chat-url="@{/agent/chat}"
+                 th:data-history-url="@{/agent/history}"
+                 th:data-clear-url="@{/agent/clear}"
+                 th:data-quota-url="@{/agent/quota}"
+                 th:data-csrf-header="${_csrf.headerName}"
+                 th:data-csrf-token="${_csrf.token}">
+
+            <header class="agent-panel-header">
+                <span class="fw-semibold">AI 学习助手</span>
+                <div class="agent-panel-actions">
+                    <button type="button" id="agentClear" class="btn btn-sm btn-link text-muted-app">清空</button>
+                    <button type="button" id="agentClose" class="btn-close" aria-label="关闭"></button>
+                </div>
+            </header>
+
+            <div id="agentMessages" class="agent-messages">
+                <!-- 没有消息时显示示例问题，点击直接发送 -->
+                <div id="agentEmpty" class="text-muted-app small">
+                    <p class="mb-2">可以问我单词的意思，或者你自己的学习情况，比如：</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-prompt>ubiquitous 是什么意思？</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-prompt>我这周学得怎么样？</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-prompt>我今天要复习哪些词？</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-prompt>我最常错的是哪些词？</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-prompt>今天打卡还差几题？</button>
+                    </div>
+                </div>
+            </div>
+
+            <form id="agentForm" class="agent-form">
+                <textarea id="agentInput" class="form-control" rows="2" maxlength="500"
+                          placeholder="Enter 发送，Shift + Enter 换行" required></textarea>
+                <button type="submit" id="agentSend" class="btn btn-primary">发送</button>
+            </form>
+            <div class="agent-footnote">
+                <span id="agentQuota"></span>
+                回答由 AI 生成，单词释义以平台词典为准；对话内容会发送给 DeepSeek 处理。
+            </div>
+        </section>
+
+        <script th:src="@{/js/agent.js}"></script>
+    </th:block>
 </th:block>
 
 </body>

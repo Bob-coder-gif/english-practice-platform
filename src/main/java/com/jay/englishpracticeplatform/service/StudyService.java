@@ -111,4 +111,11 @@ public class StudyService {
         return userWordRepository.findMistakes(userId, MASTERED_STREAK,
                 PageRequest.of(safePage, MISTAKES_PAGE_SIZE, sort));
     }
+
+
+    //复习：给若干个到期的单词，按到期时间从早到晚（给 AI 助手用）
+    @Transactional(readOnly = true)
+    public List<UserWord> listDue(Long userId,int limit){
+        return userWordRepository.findDueWords(userId,LocalDateTime.now(),PageRequest.of(0,limit));
+    }
 }
